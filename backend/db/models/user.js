@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
 						msg: 'Please enter your first name',
 					},
 					isAlpha: true,
-					len: [0, 30],
+					len: [1, 30],
 				},
 			},
 			lastName: {
@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
 						msg: 'Please enter your last name',
 					},
 					isAlpha: true,
-					len: [0, 30],
+					len: [1, 30],
 				},
 			},
 			username: {
