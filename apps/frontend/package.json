@@ -8,14 +8,10 @@
 		"bun": "^1.1.21"
 	},
 	"scripts": {
-		"build": "bun next build",
 		"clean": "git clean -xdf .next .turbo next-env.d.ts node_modules",
-		"dev": "bun next dev --turbo",
 		"format": "(biome format --write; biome lint --write --unsafe --only=nursery/useSortedClasses)",
 		"lint": "biome check",
-		"lint:fix": "biome check --write",
-		"start": "bun next start",
-		"typecheck": "tsc --noEmit"
+		"lint:fix": "biome check --write"
 	},
 	"devDependencies": {
 		"@repo/tsconfig": "workspace:*",
