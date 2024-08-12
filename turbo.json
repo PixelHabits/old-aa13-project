@@ -1,49 +1,52 @@
 {
-  "$schema": "https://turbo.build/schema.json",
-  "ui": "tui",
-  "tasks": {
-			"topo": {
-				"dependsOn": ["^topo"]
-			},
-			"build": {
-				"dependsOn": ["^build"],
-				"inputs": ["$TURBO_DEFAULT$", ".env*"],
-				"outputs": [".next/**", "!.next/cache/**"]
-			},
-			"migrate": {
-      "dependsOn": ["build"],
-      "outputs": []
-    },
-    "seed": {
-      "dependsOn": ["migrate"],
-      "outputs": []
-    },
-			"dev": {
-				"cache": false,
-				"persistent": true
-			},
-			"lint": {
-				"dependsOn": ["^topo"]
-			},
-			"format": {
-				"dependsOn": ["^topo"],
-				"cache": false
-			},
-			"lint:fix": {
-				"dependsOn": ["^topo"]
-			},
-			"format:fix": {
-				"dependsOn": ["^topo"]
-			},
-			"typecheck": {
-				"dependsOn": ["^topo", "^build"],
-				"outputs": ["node_modules/.cache/tsbuildinfo.json"]
-			},
-			"clean": {
-				"cache": false
-			},
-			"//#clean": {
-				"cache": false
-			}
+	"$schema": "https://turbo.build/schema.json",
+	"ui": "tui",
+	"globalDependencies": [".env"],
+	"tasks": {
+		"topo": {
+			"dependsOn": ["^topo"]
+		},
+		"build": {
+			"dependsOn": ["^build"],
+			"inputs": ["$TURBO_DEFAULT$", ".env*"],
+			"outputs": [".next/**", "!.next/cache/**"]
+		},
+		"migrate": {
+			"dependsOn": ["build"],
+			"inputs": ["$TURBO_DEFAULT$", ".env*"],
+			"outputs": []
+		},
+		"seed": {
+			"dependsOn": ["migrate"],
+			"inputs": ["$TURBO_DEFAULT$", ".env*"],
+			"outputs": []
+		},
+		"dev": {
+			"cache": false,
+			"persistent": true
+		},
+		"lint": {
+			"dependsOn": ["^topo"]
+		},
+		"format": {
+			"dependsOn": ["^topo"],
+			"cache": false
+		},
+		"lint:fix": {
+			"dependsOn": ["^topo"]
+		},
+		"format:fix": {
+			"dependsOn": ["^topo"]
+		},
+		"typecheck": {
+			"dependsOn": ["^topo", "^build"],
+			"outputs": ["node_modules/.cache/tsbuildinfo.json"]
+		},
+		"clean": {
+			"cache": false
+		},
+		"//#clean": {
+			"cache": false
 		}
+	}
 }
