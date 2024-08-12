@@ -1,0 +1,40 @@
+{
+	"folders": [
+		{
+			"path": "..",
+			"name": "root"
+		},
+		{
+			"name": "native",
+			"path": "../apps/native/"
+		},
+		{
+			"name": "webapp",
+			"path": "../apps/webapp/"
+		},
+		{
+			"name": "site",
+			"path": "../apps/site/"
+		},
+		{
+			"name": "api",
+			"path": "../packages/api/"
+		},
+		{
+			"name": "db",
+			"path": "../packages/db/"
+		},
+		{
+			"name": "ui",
+			"path": "../packages/ui/"
+		},
+		{
+			"name": "validators",
+			"path": "../packages/validatos/"
+		},
+		{
+			"name": "tooling",
+			"path": "../tooling/"
+		}
+	]
+}

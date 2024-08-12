@@ -1,0 +1,41 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+			"topo": {
+				"dependsOn": ["^topo"]
+			},
+			"build": {
+				"dependsOn": ["^build"],
+				"inputs": ["$TURBO_DEFAULT$", ".env*"],
+				"outputs": [".next/**", "!.next/cache/**"]
+			},
+			"dev": {
+				"cache": false,
+				"persistent": true
+			},
+			"lint": {
+				"dependsOn": ["^topo"]
+			},
+			"format": {
+				"dependsOn": ["^topo"],
+				"cache": false
+			},
+			"lint:fix": {
+				"dependsOn": ["^topo"]
+			},
+			"format:fix": {
+				"dependsOn": ["^topo"]
+			},
+			"typecheck": {
+				"dependsOn": ["^topo", "^build"],
+				"outputs": ["node_modules/.cache/tsbuildinfo.json"]
+			},
+			"clean": {
+				"cache": false
+			},
+			"//#clean": {
+				"cache": false
+			}
+		}
+}

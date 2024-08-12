@@ -27,13 +27,16 @@ router.get('/', (req, res) => {
 	if (user) {
 		const safeUser = {
 			id: user.id,
+			firstName: user.firstName,
+			lastName: user.lastName,
 			email: user.email,
 			username: user.username,
 		};
 		return res.json({
 			user: safeUser,
 		});
-	} else return res.json({ user: null });
+	} 
+	return res.json({ user: null });
 });
 
 // Log in
@@ -59,6 +62,8 @@ router.post('/', validateLogin, async (req, res, next) => {
 
 	const safeUser = {
 		id: user.id,
+		firstName: user.firstName,
+		lastName: user.lastName,
 		email: user.email,
 		username: user.username,
 	};

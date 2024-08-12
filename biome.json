@@ -1,0 +1,94 @@
+{
+	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+	"organizeImports": {
+		"enabled": true
+	},
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"formatter": {
+		"enabled": true,
+		"formatWithErrors": true
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"complexity": {
+				"noExcessiveCognitiveComplexity": "warn",
+				"noVoid": "error",
+				"useSimplifiedLogicExpression": "error"
+			},
+			"correctness": {
+				"noConstantMathMinMaxClamp": "error",
+				"noNewSymbol": "error",
+				"noNodejsModules": "error",
+				"noUndeclaredVariables": "error",
+				"noUnusedImports": "error",
+				"noUnusedPrivateClassMembers": "error",
+				"noUnusedVariables": "error",
+				"useArrayLiterals": "error",
+				"useHookAtTopLevel": "error"
+			},
+			"performance": {
+				"noBarrelFile": "error",
+				"noReExportAll": "error"
+			},
+			"style": {
+				"noImplicitBoolean": "error",
+				"noNamespace": "error",
+				"noNamespaceImport": "off",
+				"noNegationElse": "error",
+				"noParameterProperties": "error",
+				"noShoutyConstants": "error",
+				"useCollapsedElseIf": "error",
+				"useConsistentArrayType": "error",
+				"useFilenamingConvention": "off",
+				"useForOf": "error",
+				"useFragmentSyntax": "error",
+				"useShorthandArrayType": "error",
+				"useShorthandAssign": "error",
+				"useSingleCaseStatement": "error"
+			},
+			"suspicious": {
+				"noConsoleLog": "warn",
+				"noEmptyBlockStatements": "error",
+				"noSkippedTests": "warn",
+				"useAwait": "warn"
+			},
+			"nursery": {
+				"useSortedClasses": {
+					"level": "info",
+					"fix": "unsafe",
+					"options": {}
+				}
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"enabled": true,
+			"jsxQuoteStyle": "single",
+			"quoteStyle": "single"
+		}
+	},
+	"json": {
+		"parser": {
+			"allowComments": true
+		}
+	},
+	"css": {
+		"parser": {
+			"cssModules": true
+		},
+		"formatter": {
+			"enabled": true,
+			"quoteStyle": "single"
+		},
+		"linter": {
+			"enabled": true
+		}
+	}
+}
