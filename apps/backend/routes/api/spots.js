@@ -139,7 +139,7 @@ router.get('/current', requireAuth, async (req, res) => {
 			[
 				sequelize.literal(`(
                     SELECT AVG(stars)
-                    FROM Reviews AS reviews
+                    FROM "air_bnb"."Reviews" AS reviews
                     WHERE reviews.spotId = Spot.id
                 )`),
 				'avgRating',
@@ -147,7 +147,7 @@ router.get('/current', requireAuth, async (req, res) => {
 			[
 				sequelize.literal(`(
                     SELECT url
-                    FROM SpotImages AS images
+                    FROM "air_bnb"."SpotImages" AS images
                     WHERE images.spotId = Spot.id AND images.preview = true
                     LIMIT 1
                 )`),
@@ -236,7 +236,7 @@ router.get('/:spotId', async (req, res) => {
 			[
 				sequelize.literal(`(
                     SELECT COUNT(*)
-                    FROM Reviews AS reviews
+                    FROM "air_bnb"."Reviews" AS reviews
                     WHERE reviews.spotId = Spot.id
                 )`),
 				'numReviews',
@@ -244,7 +244,7 @@ router.get('/:spotId', async (req, res) => {
 			[
 				sequelize.literal(`(
                     SELECT AVG(stars)
-                    FROM Reviews AS reviews
+                    FROM "air_bnb"."Reviews" AS reviews
                     WHERE reviews.spotId = Spot.id
                 )`),
 				'avgStarRating',
@@ -376,19 +376,19 @@ router.get('/', validateQuery, async (req, res) => {
 				'updatedAt',
 				[
 					sequelize.literal(`(
-                        SELECT AVG(stars)
-                        FROM Reviews AS reviews
-                        WHERE reviews.spotId = Spot.id
-                    )`),
+                    SELECT AVG(stars)
+                    FROM "air_bnb"."Reviews" AS reviews
+                    WHERE reviews.spotId = Spot.id
+                )`),
 					'avgRating',
 				],
 				[
 					sequelize.literal(`(
-                        SELECT url
-                        FROM SpotImages AS images
-                        WHERE images.spotId = Spot.id AND images.preview = true
-                        LIMIT 1
-                    )`),
+                    SELECT url
+                    FROM "air_bnb"."SpotImages" AS images
+                    WHERE images.spotId = Spot.id AND images.preview = true
+                    LIMIT 1
+                )`),
 					'previewImage',
 				],
 			],

@@ -21,7 +21,7 @@ const validateReview = [
 		.exists({ checkFalsy: true })
 		.isInt({ min: 1, max: 5 })
 		.withMessage('Stars must be an integer from 1 to 5'),
-    handleValidationErrors,
+	handleValidationErrors,
 ];
 const router = express.Router();
 
@@ -48,7 +48,7 @@ router.get('/current', requireAuth, async (req, res) => {
 					[
 						sequelize.literal(`(
                     SELECT url
-                    FROM SpotImages AS images
+                    FROM "air_bnb"."SpotImages" AS images
                     WHERE images.spotId = Spot.id AND images.preview = true
                     LIMIT 1
                 )`),
@@ -77,9 +77,9 @@ router.post('/:reviewId/images', requireAuth, async (req, res) => {
 			message: 'Maximum number of images for this resource was reached',
 		});
 	}
-  if (review.userId !== req.user.id) {
-    return res.status(403).json({ message: 'Forbidden' });
-  }
+	if (review.userId !== req.user.id) {
+		return res.status(403).json({ message: 'Forbidden' });
+	}
 	const newImage = await ReviewImage.create({
 		reviewId: review.id,
 		url: req.body.url,
