@@ -16,4 +16,8 @@ router.post('/test', (req, res) => {
 	res.json({ requestBody: req.body });
 });
 
+router.get('/', (req, res) => {
+	res.json({ message: 'Test API Route' });
+});
+
 module.exports = router;
