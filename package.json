@@ -1,9 +1,9 @@
 {
 	"name": "api-project",
 	"private": true,
-	"packageManager": "bun@1.1.22",
+	"packageManager": "bun@1.1.29",
 	"engines": {
-		"bun": "^1.1.22"
+		"bun": "^1.1.29"
 	},
 	"scripts": {
 		"build": "turbo run build",
@@ -20,11 +20,14 @@
 		"typecheck": "turbo run typecheck"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^1.8.3",
+		"@biomejs/biome": "^1.9.2",
 		"@repo/tsconfig": "workspace:*",
 		"@turbo/gen": "^2.0.12",
 		"turbo": "^2.0.12",
-		"typescript": "^5.5.4"
+		"typescript": "^5.6.2"
 	},
-	"workspaces": ["apps/*", "tooling/*"]
+	"workspaces": [
+		"apps/*",
+		"tooling/*"
+	]
 }
