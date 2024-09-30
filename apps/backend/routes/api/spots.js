@@ -5,7 +5,7 @@ const { requireAuth } = require('../../utils/auth');
 const { check } = require('express-validator');
 const { handleValidationErrors } = require('../../utils/validation');
 
-const { Spot, SpotImage } = require('../../db/models');
+const { Spot, SpotImage, User, sequelize } = require('../../db/models');
 
 const validateSpot = [
 	check('address')
@@ -33,7 +33,7 @@ const validateSpot = [
 		.withMessage('Description is required'),
 	check('price')
 		.exists({ checkFalsy: true })
-    .isFloat({ min: 0 })
+		.isFloat({ min: 0 })
 		.withMessage('Price per day must be a positive number'),
 	handleValidationErrors,
 ];
@@ -42,83 +42,214 @@ const router = express.Router();
 
 // Create a spot
 router.post('/', requireAuth, validateSpot, async (req, res) => {
-  const { address, city, state, country, lat, lng, name, description, price } = req.body;
-  const newSpot = await Spot.create({
-    ownerId: req.user.id,
-    address,
-    city,
-    state,
-    country,
-    lat,
-    lng,
-    name,
-    description,
-    price,
-  });
-  res.status(201).json(newSpot);
-});
-
-// Get a spot by id
-router.get('/:spotId', async (req, res) => {
-  const spot = await Spot.findByPk(req.params.id);
-  if (spot) {
-    res.json(spot);
-  } else {
-    res.status(404).json({ message: "Spot couldn't be found" });
-  }
-});
-
-// Edit a spot
-router.put('/:spotId', requireAuth, validateSpot, async (req, res) => {
-  const spot = await Spot.findByPk(req.params.spotId);
-  if (spot) {
-    await spot.update(req.body);
-    res.json(spot);
-  } else {
-    res.status(404).json({ message: "Spot couldn't be found" });
-  }
-});
-
-// Add a spot image
-router.post('/:spotId/images', requireAuth, async (req, res) => {
-  const spot = await Spot.findByPk(req.params.spotId);
-  if (spot) {
-    // Add image to the spot
-    const image = await SpotImage.create({
-      spotId: spot.id,
-      url: req.body.url,
-      preview: req.body.preview,});
-    res.status(201).json(image);
-  } else {
-    res.status(404).json({ message: "Spot couldn't be found" });
-  }
-});
-
-// Delete a spot
-router.delete('/:spotId', requireAuth, async (req, res) => {
-  const spot = await Spot.findByPk(req.params.spotId);
-  if (spot) {
-    await spot.destroy();
-    res.status(200).json({ message: 'Successfully deleted' });
-  } else {
-    res.status(404).json({ message: "Spot couldn't be found" });
-  }
+	const { address, city, state, country, lat, lng, name, description, price } =
+		req.body;
+	const newSpot = await Spot.create({
+		ownerId: req.user.id,
+		address,
+		city,
+		state,
+		country,
+		lat,
+		lng,
+		name,
+		description,
+		price,
+	});
+	res.status(201).json(newSpot);
 });
 
 // Get all spots owned by the Current User
 router.get('/current', requireAuth, async (req, res) => {
-  const spots = await Spot.findAll({
-    where: { ownerId: req.user.id },
-  });
-  res.json(spots);
+	if (!req.user) {
+		return res.status(200).json({ user: null });
+	}
+
+	const spots = await Spot.findAll({
+		attributes: [
+			'id',
+			'ownerId',
+			'address',
+			'city',
+			'state',
+			'country',
+			'lat',
+			'lng',
+			'name',
+			'description',
+			'price',
+			'createdAt',
+			'updatedAt',
+			[
+				sequelize.literal(`(
+                    SELECT AVG(stars)
+                    FROM Reviews AS reviews
+                    WHERE reviews.spotId = Spot.id
+                )`),
+				'avgRating',
+			],
+			[
+				sequelize.literal(`(
+                    SELECT url
+                    FROM SpotImages AS images
+                    WHERE images.spotId = Spot.id AND images.preview = true
+                    LIMIT 1
+                )`),
+				'previewImage',
+			],
+		],
+		where: { ownerId: req.user.id },
+	});
+
+	if (!spots.length) {
+		return res
+			.status(404)
+			.json({ message: 'No spots found for the current user' });
+	}
+
+	res.json({ Spots: spots });
+});
+
+// Get a spot by id
+router.get('/:spotId', async (req, res) => {
+	const spot = await Spot.findByPk(req.params.spotId, {
+		attributes: [
+			'id',
+			'ownerId',
+			'address',
+			'city',
+			'state',
+			'country',
+			'lat',
+			'lng',
+			'name',
+			'description',
+			'price',
+			'createdAt',
+			'updatedAt',
+			[
+				sequelize.literal(`(
+                    SELECT COUNT(*)
+                    FROM Reviews AS reviews
+                    WHERE reviews.spotId = Spot.id
+                )`),
+				'numReviews',
+			],
+			[
+				sequelize.literal(`(
+                    SELECT AVG(stars)
+                    FROM Reviews AS reviews
+                    WHERE reviews.spotId = Spot.id
+                )`),
+				'avgStarRating',
+			],
+		],
+		include: [
+			{
+				model: SpotImage,
+				as: 'SpotImages',
+				attributes: ['id', 'url', 'preview'],
+			},
+			{
+				model: User,
+				as: 'Owner',
+				attributes: ['id', 'firstName', 'lastName'],
+			},
+		],
+	});
+	if (spot) {
+		res.status(200).json(spot);
+	} else {
+		res.status(404).json({ message: "Spot couldn't be found" });
+	}
+});
+
+// Edit a spot
+router.put('/:spotId', requireAuth, validateSpot, async (req, res) => {
+	const spot = await Spot.findByPk(req.params.spotId);
+	if (spot) {
+		if (spot.ownerId !== req.user.id) {
+			res.status(403).json({ message: 'Forbidden' });
+			return;
+		}
+		await spot.update(req.body);
+		res.json(spot);
+	} else {
+		res.status(404).json({ message: "Spot couldn't be found" });
+	}
+});
+
+// Add a spot image
+router.post('/:spotId/images', requireAuth, async (req, res) => {
+	const spot = await Spot.findByPk(req.params.spotId);
+	if (spot) {
+		if (spot.ownerId !== req.user.id) {
+			res.status(403).json({ message: 'Forbidden' });
+			return;
+		}
+		const image = await SpotImage.create({
+			spotId: spot.id,
+			url: req.body.url,
+			preview: req.body.preview,
+		});
+		res.status(201).json(image);
+	} else {
+		res.status(404).json({ message: "Spot couldn't be found" });
+	}
+});
+
+// Delete a spot
+router.delete('/:spotId', requireAuth, async (req, res) => {
+	const spot = await Spot.findByPk(req.params.spotId);
+	if (spot) {
+		if (spot.ownerId !== req.user.id) {
+			res.status(403).json({ message: 'Forbidden' });
+			return;
+		}
+		await spot.destroy();
+		res.status(200).json({ message: 'Successfully deleted' });
+	} else {
+		res.status(404).json({ message: "Spot couldn't be found" });
+	}
 });
 
 // Get all spots
-router.get('/', async (req, res) => {
-  const spots = await Spot.findAll();
-  res.json(spots);
+router.get('/', async (_req, res) => {
+	const spots = await Spot.findAll({
+		attributes: [
+			'id',
+			'ownerId',
+			'address',
+			'city',
+			'state',
+			'country',
+			'lat',
+			'lng',
+			'name',
+			'description',
+			'price',
+			'createdAt',
+			'updatedAt',
+			[
+				sequelize.literal(`(
+                    SELECT AVG(stars)
+                    FROM Reviews AS reviews
+                    WHERE reviews.spotId = Spot.id
+                )`),
+				'avgRating',
+			],
+			[
+				sequelize.literal(`(
+                    SELECT url
+                    FROM SpotImages AS images
+                    WHERE images.spotId = Spot.id AND images.preview = true
+                    LIMIT 1
+                )`),
+				'previewImage',
+			],
+		],
+	});
+	res.json({ Spots: spots });
 });
-
-
 
 module.exports = router;

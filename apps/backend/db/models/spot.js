@@ -8,9 +8,12 @@ module.exports = (sequelize, DataTypes) => {
 		 */
 		static associate(models) {
 			// define association here
-			Spot.belongsTo(models.User, { foreignKey: 'ownerId' });
-			Spot.hasMany(models.SpotImage, { foreignKey: 'spotId' });
-      Spot.hasMany(models.Review, { foreignKey: 'spotId' });
+			Spot.belongsTo(models.User, { foreignKey: 'ownerId', as: 'Owner' });
+			Spot.hasMany(models.SpotImage, {
+				foreignKey: 'spotId',
+				as: 'SpotImages',
+			});
+			Spot.hasMany(models.Review, { foreignKey: 'spotId', as: 'Reviews' });
 		}
 	}
 	Spot.init(
@@ -45,23 +48,6 @@ module.exports = (sequelize, DataTypes) => {
 		{
 			sequelize,
 			modelName: 'Spot',
-			defaultScope: {
-				include: [
-					{
-						model: sequelize.models.Review,
-						where: { spotId: sequelize.col('Spot.id') },
-						attributes: [
-							[sequelize.fn('AVG', sequelize.col('rating')), 'avgRating'],
-						],
-					},
-					{
-						model: sequelize.models.SpotImage,
-						where: { preview: true },
-						attributes: ['url'],
-						required: false,
-					},
-				],
-			},
 		},
 	);
 	return Spot;
