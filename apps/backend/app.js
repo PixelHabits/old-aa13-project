@@ -45,7 +45,7 @@ app.use(
 
 app.use(routes); // Connect all the routes
 
-app.get('/', (res) => {res.send('Hello World!')});
+app.get('/', (_req,res) => {res.send('Hello World!')});
 
 // Catch unhandled requests and forward to error handler.
 app.use((_req, _res, next) => {
