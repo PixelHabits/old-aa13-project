@@ -105,12 +105,17 @@ router.delete('/:spotId', requireAuth, async (req, res) => {
   }
 });
 
+// Get all spots owned by the Current User
+router.get('/current', requireAuth, async (req, res) => {
+  const spots = await Spot.findAll({
+    where: { ownerId: req.user.id },
+  });
+  res.json(spots);
+});
+
 // Get all spots
 router.get('/', async (req, res) => {
-  const spots = await Spot.findAll(
-    include: [],
-
-  );
+  const spots = await Spot.findAll();
   res.json(spots);
 });
 
