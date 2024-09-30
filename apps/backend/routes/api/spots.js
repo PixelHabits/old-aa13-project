@@ -2,6 +2,8 @@ const express = require('express');
 
 const { requireAuth } = require('../../utils/auth');
 
+const { Op } = require('sequelize');
+
 const { check } = require('express-validator');
 const { handleValidationErrors } = require('../../utils/validation');
 
@@ -53,6 +55,42 @@ const validateReview = [
 		.exists({ checkFalsy: true })
 		.isInt({ min: 1, max: 5 })
 		.withMessage('Stars must be an integer from 1 to 5'),
+	handleValidationErrors,
+];
+
+const validateQuery = [
+	check('page')
+		.optional()
+		.isInt({ min: 1 })
+		.withMessage('Page must be greater than or equal to 1'),
+	check('size')
+		.optional()
+		.isInt({ min: 1, max: 20 })
+		.withMessage('Size must be between 1 and 20'),
+	check('maxLat')
+		.optional()
+		.isInt({ min: -90, max: 90 })
+		.withMessage('Maximum latitude is invalid'),
+	check('minLat')
+		.optional()
+		.isInt({ min: -90, max: 90 })
+		.withMessage('Minimum latitude is invalid'),
+	check('minLng')
+		.optional()
+		.isInt({ min: -180, max: 180 })
+		.withMessage('Minimum longitude is invalid'),
+	check('maxLng')
+		.optional()
+		.isInt({ min: -180, max: 180 })
+		.withMessage('Maximum longitude is invalid'),
+	check('minPrice')
+		.optional()
+		.isInt({ min: 0 })
+		.withMessage('Minimum price must be greater than or equal to 0'),
+	check('maxPrice')
+		.optional()
+		.isInt({ min: 0 })
+		.withMessage('Maximum price must be greater than or equal to 0'),
 	handleValidationErrors,
 ];
 
@@ -142,7 +180,7 @@ router.get('/:spotId/reviews', async (req, res) => {
 				{ model: ReviewImage, as: 'ReviewImages' },
 			],
 		});
-		res.json({Reviews: reviews});
+		res.json({ Reviews: reviews });
 	} else {
 		res.status(404).json({ message: "Spot couldn't be found" });
 	}
@@ -282,42 +320,85 @@ router.delete('/:spotId', requireAuth, async (req, res) => {
 });
 
 // Get all spots
-router.get('/', async (_req, res) => {
-	const spots = await Spot.findAll({
-		attributes: [
-			'id',
-			'ownerId',
-			'address',
-			'city',
-			'state',
-			'country',
-			'lat',
-			'lng',
-			'name',
-			'description',
-			'price',
-			'createdAt',
-			'updatedAt',
-			[
-				sequelize.literal(`(
-                    SELECT AVG(stars)
-                    FROM Reviews AS reviews
-                    WHERE reviews.spotId = Spot.id
-                )`),
-				'avgRating',
+router.get('/', validateQuery, async (req, res) => {
+	try {
+		let {
+			page = 1,
+			size = 20,
+			minLat,
+			maxLat,
+			minLng,
+			maxLng,
+			minPrice,
+			maxPrice,
+		} = req.query;
+
+		page = +page || 1;
+		size = +size || 20;
+		minLat = +minLat;
+		maxLat = +maxLat;
+		minLng = +minLng;
+		maxLng = +maxLng;
+		minPrice = +minPrice;
+		maxPrice = +maxPrice;
+
+		const pagination = {
+			limit: size,
+			offset: (page - 1) * size,
+		};
+
+		const where = {};
+
+		if (!isNaN(minLat)) where.lat = { [Op.gte]: minLat };
+		if (!isNaN(maxLat)) where.lat = { ...where.lat, [Op.lte]: maxLat };
+		if (!isNaN(minLng)) where.lng = { [Op.gte]: minLng };
+		if (!isNaN(maxLng)) where.lng = { ...where.lng, [Op.lte]: maxLng };
+		if (!isNaN(minPrice) && minPrice >= 0) where.price = { [Op.gte]: minPrice };
+		if (!isNaN(maxPrice) && maxPrice >= 0)
+			where.price = { ...where.price, [Op.lte]: maxPrice };
+
+		const spots = await Spot.findAll({
+			where,
+			...pagination,
+			attributes: [
+				'id',
+				'ownerId',
+				'address',
+				'city',
+				'state',
+				'country',
+				'lat',
+				'lng',
+				'name',
+				'description',
+				'price',
+				'createdAt',
+				'updatedAt',
+				[
+					sequelize.literal(`(
+                        SELECT AVG(stars)
+                        FROM Reviews AS reviews
+                        WHERE reviews.spotId = Spot.id
+                    )`),
+					'avgRating',
+				],
+				[
+					sequelize.literal(`(
+                        SELECT url
+                        FROM SpotImages AS images
+                        WHERE images.spotId = Spot.id AND images.preview = true
+                        LIMIT 1
+                    )`),
+					'previewImage',
+				],
 			],
-			[
-				sequelize.literal(`(
-                    SELECT url
-                    FROM SpotImages AS images
-                    WHERE images.spotId = Spot.id AND images.preview = true
-                    LIMIT 1
-                )`),
-				'previewImage',
-			],
-		],
-	});
-	res.json({ Spots: spots });
+		});
+
+		res.json({ Spots: spots, page, size });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: 'Internal server error' });
+	}
 });
 
 module.exports = router;
