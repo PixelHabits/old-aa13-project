@@ -8,8 +8,8 @@
 	},
 	"scripts": {
 		"build": "bun psql-setup-script.js",
-		"migrate": "bun sequelize db:migrate",
-		"seed": "bun sequelize db:seed:all",
+		"migrate": "bun dotenv sequelize db:migrate",
+		"seed": "bun dotenv sequelize db:seed:all",
 		"clean": "git clean -xdf .turbo node_modules",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"format": "(biome format --write; biome lint --write --unsafe --only=nursery/useSortedClasses)",
