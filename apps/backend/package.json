@@ -11,7 +11,6 @@
 		"migrate": "bun dotenv sequelize db:migrate",
 		"seed": "bun dotenv sequelize db:seed:all",
 		"clean": "git clean -xdf .turbo node_modules",
-		"test": "echo \"Error: no test specified\" && exit 1",
 		"format": "(biome format --write; biome lint --write --unsafe --only=nursery/useSortedClasses)",
 		"lint": "biome check",
 		"lint:fix": "biome check --write",
@@ -19,7 +18,12 @@
 		"sequelize-cli": "sequelize-cli",
 		"start": "per-env",
 		"start:development": "bun --hot ./bin/www",
-		"start:production": "bun ./bin/www"
+		"start:production": "bun ./bin/www",
+		"test": "mocha ./tests/**/*.test.mjs",
+		"test-auth": "mocha './tests/01-auth/**/*.test.mjs'",
+		"test-spots": "mocha './tests/02-spots/**/*.test.mjs'",
+		"test-reviews": "mocha './tests/03-reviews/**/*.test.mjs'",
+		"test-images": "mocha './tests/04-delete-images-q-params/**/*.test.mjs'"
 	},
 	"keywords": [],
 	"author": "",
@@ -27,6 +31,7 @@
 	"description": "",
 	"dependencies": {
 		"bcryptjs": "^2.4.3",
+		"chai": "^5.1.0",
 		"cookie-parser": "^1.4.6",
 		"cors": "^2.8.5",
 		"csurf": "^1.11.0",
@@ -36,11 +41,13 @@
 		"express-validator": "^7.2.0",
 		"helmet": "^8.0.0",
 		"jsonwebtoken": "^9.0.2",
+		"mocha": "^10.4.0",
 		"morgan": "^1.10.0",
 		"per-env": "^1.0.2",
 		"pg": "^8.13.0",
 		"sequelize": "^6.37.3",
-		"sequelize-cli": "^6.6.2"
+		"sequelize-cli": "^6.6.2",
+		"supertest": "^7.0.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.2",
