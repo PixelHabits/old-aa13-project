@@ -320,42 +320,85 @@ router.delete('/:spotId', requireAuth, async (req, res) => {
 });
 
 // Get all spots
-router.get('/', async (_req, res) => {
-	const spots = await Spot.findAll({
-		attributes: [
-			'id',
-			'ownerId',
-			'address',
-			'city',
-			'state',
-			'country',
-			'lat',
-			'lng',
-			'name',
-			'description',
-			'price',
-			'createdAt',
-			'updatedAt',
-			[
-				sequelize.literal(`(
-                    SELECT AVG(stars)
-                    FROM Reviews AS reviews
-                    WHERE reviews.spotId = Spot.id
-                )`),
-				'avgRating',
+router.get('/', validateQuery, async (req, res) => {
+	try {
+		let {
+			page = 1,
+			size = 20,
+			minLat,
+			maxLat,
+			minLng,
+			maxLng,
+			minPrice,
+			maxPrice,
+		} = req.query;
+
+		page = +page || 1;
+		size = +size || 20;
+		minLat = +minLat;
+		maxLat = +maxLat;
+		minLng = +minLng;
+		maxLng = +maxLng;
+		minPrice = +minPrice;
+		maxPrice = +maxPrice;
+
+		const pagination = {
+			limit: size,
+			offset: (page - 1) * size,
+		};
+
+		const where = {};
+
+		if (!isNaN(minLat)) where.lat = { [Op.gte]: minLat };
+		if (!isNaN(maxLat)) where.lat = { ...where.lat, [Op.lte]: maxLat };
+		if (!isNaN(minLng)) where.lng = { [Op.gte]: minLng };
+		if (!isNaN(maxLng)) where.lng = { ...where.lng, [Op.lte]: maxLng };
+		if (!isNaN(minPrice) && minPrice >= 0) where.price = { [Op.gte]: minPrice };
+		if (!isNaN(maxPrice) && maxPrice >= 0)
+			where.price = { ...where.price, [Op.lte]: maxPrice };
+
+		const spots = await Spot.findAll({
+			where,
+			...pagination,
+			attributes: [
+				'id',
+				'ownerId',
+				'address',
+				'city',
+				'state',
+				'country',
+				'lat',
+				'lng',
+				'name',
+				'description',
+				'price',
+				'createdAt',
+				'updatedAt',
+				[
+					sequelize.literal(`(
+                        SELECT AVG(stars)
+                        FROM Reviews AS reviews
+                        WHERE reviews.spotId = Spot.id
+                    )`),
+					'avgRating',
+				],
+				[
+					sequelize.literal(`(
+                        SELECT url
+                        FROM SpotImages AS images
+                        WHERE images.spotId = Spot.id AND images.preview = true
+                        LIMIT 1
+                    )`),
+					'previewImage',
+				],
 			],
-			[
-				sequelize.literal(`(
-                    SELECT url
-                    FROM SpotImages AS images
-                    WHERE images.spotId = Spot.id AND images.preview = true
-                    LIMIT 1
-                )`),
-				'previewImage',
-			],
-		],
-	});
-	res.json({ Spots: spots });
+		});
+
+		res.json({ Spots: spots, page, size });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: 'Internal server error' });
+	}
 });
 
 module.exports = router;
