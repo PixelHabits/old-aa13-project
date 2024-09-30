@@ -8,4 +8,4 @@ If you're testing locally, ensure your server is running.
 
 */
 
-export const apiBaseUrl = 'http://localhost:8001/api';
+export const apiBaseUrl = 'https://aa13-project.onrender.com/api';
