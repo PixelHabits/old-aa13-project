@@ -138,19 +138,19 @@ router.get('/current', requireAuth, async (req, res) => {
 			'updatedAt',
 			[
 				sequelize.literal(`(
-                    SELECT AVG(stars)
-                    FROM "air_bnb"."Reviews" AS reviews
-                    WHERE reviews.spotId = Spot.id
-                )`),
+                SELECT AVG("stars")
+                FROM "air_bnb"."Reviews" AS "reviews"
+                WHERE "reviews"."spotId" = "Spot"."id"
+            )`),
 				'avgRating',
 			],
 			[
 				sequelize.literal(`(
-                    SELECT url
-                    FROM "air_bnb"."SpotImages" AS images
-                    WHERE images.spotId = Spot.id AND images.preview = true
-                    LIMIT 1
-                )`),
+                SELECT "url"
+                FROM "air_bnb"."SpotImages" AS "images"
+                WHERE "images"."spotId" = "Spot"."id" AND "images"."preview" = true
+                LIMIT 1
+            )`),
 				'previewImage',
 			],
 		],
@@ -235,18 +235,18 @@ router.get('/:spotId', async (req, res) => {
 			'updatedAt',
 			[
 				sequelize.literal(`(
-                    SELECT COUNT(*)
-                    FROM "air_bnb"."Reviews" AS reviews
-                    WHERE reviews.spotId = Spot.id
-                )`),
+		SELECT COUNT(*)
+		FROM "air_bnb"."Reviews" AS "reviews"
+		WHERE "reviews"."spotId" = "Spot"."id"
+	)`),
 				'numReviews',
 			],
 			[
 				sequelize.literal(`(
-                    SELECT AVG(stars)
-                    FROM "air_bnb"."Reviews" AS reviews
-                    WHERE reviews.spotId = Spot.id
-                )`),
+		SELECT AVG("reviews"."stars")
+		FROM "air_bnb"."Reviews" AS "reviews"
+		WHERE "reviews"."spotId" = "Spot"."id"
+	)`),
 				'avgStarRating',
 			],
 		],
@@ -376,19 +376,20 @@ router.get('/', validateQuery, async (req, res) => {
 				'updatedAt',
 				[
 					sequelize.literal(`(
-                    SELECT AVG(stars)
-                    FROM "air_bnb"."Reviews" AS reviews
-                    WHERE reviews.spotId = Spot.id
-                )`),
+		SELECT AVG("reviews"."stars")
+		FROM "air_bnb"."Reviews" AS "reviews"
+		WHERE "reviews"."spotId" = "Spot"."id"
+	)`),
 					'avgRating',
 				],
 				[
 					sequelize.literal(`(
-                    SELECT url
-                    FROM "air_bnb"."SpotImages" AS images
-                    WHERE images.spotId = Spot.id AND images.preview = true
-                    LIMIT 1
-                )`),
+		SELECT "images"."url"
+		FROM "air_bnb"."SpotImages" AS "images"
+		WHERE "images"."spotId" = "Spot"."id"
+		AND "images"."preview" = true
+		LIMIT 1
+	)`),
 					'previewImage',
 				],
 			],
