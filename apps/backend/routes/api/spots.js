@@ -13,7 +13,6 @@ const {
 	User,
 	Review,
 	ReviewImage,
-	sequelize,
 } = require('../../db/models');
 
 const validateSpot = [

@@ -1,9 +1,10 @@
-'use strict';
-
-const fs = require('fs');
-const path = require('path');
+// biome-ignore lint/correctness/noNodejsModules: <explanation>
+const fs = require('node:fs');
+// biome-ignore lint/correctness/noNodejsModules: <explanation>
+const path = require('node:path');
 const Sequelize = require('sequelize');
-const process = require('process');
+// biome-ignore lint/correctness/noNodejsModules: <explanation>
+const process = require('node:process');
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
 const config = require(`${__dirname}/../../config/database.js`)[env];
