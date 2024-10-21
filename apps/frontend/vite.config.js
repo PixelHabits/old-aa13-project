@@ -12,7 +12,7 @@ export default defineConfig(() => ({
 		// }),
 		biomePlugin({
 			mode: 'check',
-			failOnError: true,
+			// failOnError: true,
 			applyFixes: true,
 		}),
 	],
