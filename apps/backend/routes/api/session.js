@@ -2,7 +2,7 @@ const express = require('express');
 const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 
-const { setTokenCookie, restoreUser } = require('../../utils/auth');
+const { setTokenCookie } = require('../../utils/auth');
 const { User } = require('../../db/models');
 
 const { check } = require('express-validator');
@@ -52,7 +52,7 @@ router.post('/', validateLogin, async (req, res, next) => {
 		},
 	});
 
-	if (!user || !bcrypt.compareSync(password, user.hashedPassword.toString())) {
+	if (!(user && bcrypt.compareSync(password, user.hashedPassword.toString()))) {
 		const err = new Error('Invalid credentials');
 		err.status = 401;
 		err.title = 'Invalid credentials';

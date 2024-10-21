@@ -1,63 +1,69 @@
-import { expect, assert } from 'chai';
-import { apiBaseUrl } from '../utils/constants.mjs';
-import { expectedSpotKeys } from '../utils/err-helpers.mjs';
+import { assert, expect } from 'chai';
+import { before, describe, it } from 'mocha';
 import {
+	agentCreateSpot,
+	agentCreateSpotImage,
+	agentSignUp,
 	createManyAgents,
 	fetchManyCsrfTokens,
-	agentCreateSpot,
-	agentSignUp,
-	agentCreateSpotImage,
 } from '../utils/agent-factory.mjs';
+import { apiBaseUrl } from '../utils/constants.mjs';
+import { expectedSpotKeys } from '../utils/err-helpers.mjs';
 
-describe('\nGet all Spots owned by the Current User', function () {
-	let agent, xsrfToken, agentSpot, agentImage, unAuthAgent, xsrfToken2;
+describe('\nGet all Spots owned by the Current User', () => {
+	let agent;
+	let xsrfToken;
+	let agentSpot;
+	let _agentImage;
+	let unAuthAgent;
+	let xsrfToken2;
 
 	before(async function () {
 		this.timeout(15000);
 		[agent, unAuthAgent] = createManyAgents(apiBaseUrl, 2);
 		[xsrfToken, xsrfToken2] = await fetchManyCsrfTokens([agent, unAuthAgent]);
 		await agentSignUp(agent, xsrfToken);
-		let res = await agentCreateSpot(agent, xsrfToken);
+		const res = await agentCreateSpot(agent, xsrfToken);
 		agentSpot = res.body;
-		let imageRes = await agentCreateSpotImage(agent, xsrfToken, agentSpot.id);
-		agentImage = imageRes;
+		const imageRes = await agentCreateSpotImage(agent, xsrfToken, agentSpot.id);
+		_agentImage = imageRes;
 	});
-	describe('GET /api/spots/current', function () {
-		it('Correct Endpoint', function (done) {
-			agent.get('/spots/current').end(function (err, res) {
+	describe('GET /api/spots/current', () => {
+		it('Correct Endpoint', (done) => {
+			agent.get('/spots/current').end((err, _res) => {
 				expect(err).to.not.exist;
 				done();
 			});
 		});
 
-		it('Authentication', function (done) {
+		it('Authentication', (done) => {
 			unAuthAgent
 				.get('/spots/current')
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.expect(401)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					done();
 				});
 		});
 	});
 
-	describe('Response', function () {
-		it('Status Code - 200', function (done) {
+	describe('Response', () => {
+		it('Status Code - 200', (done) => {
 			agent
 				.get('/spots/current')
 				.expect(200)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			agent
 				.get('/spots/current')
 				.expect(200)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.be.an('object');
 					expect(res.body).to.have.property('Spots').that.is.an('array');
@@ -70,7 +76,7 @@ describe('\nGet all Spots owned by the Current User', function () {
 						expect(spot.ownerId).to.be.a('number');
 						expect(spot.address).to.be.a('string');
 
-						let {
+						const {
 							id,
 							ownerId,
 							address,
@@ -82,8 +88,6 @@ describe('\nGet all Spots owned by the Current User', function () {
 							name,
 							description,
 							price,
-							updatedAt,
-							createdAt,
 						} = agentSpot;
 
 						assert.strictEqual(spot.id, id);

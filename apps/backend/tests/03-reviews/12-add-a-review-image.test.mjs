@@ -1,34 +1,35 @@
 import { expect } from 'chai';
-import { apiBaseUrl } from '../utils/constants.mjs';
+import { before, describe, it } from 'mocha';
 import {
-	agentSignUp,
-	agentCreateSpot,
 	agentCreateReview,
-	createManyAgents,
-	fetchManyCsrfTokens,
+	agentCreateSpot,
+	agentSignUp,
 	createAgent,
+	createManyAgents,
 	fetchCsrfToken,
+	fetchManyCsrfTokens,
 } from '../utils/agent-factory.mjs';
 import { generateUniqueUsername } from '../utils/agent-helpers.mjs';
+import { apiBaseUrl } from '../utils/constants.mjs';
 
-describe("\nAdd an Image to a Review based on the Review's id", function () {
-	let agent,
-		xsrfToken,
-		agentSpot,
-		agent2,
-		xsrfToken2,
-		agent3,
-		xsrfToken3,
-		agent2Review,
-		agent4,
-		xsrfToken4;
+describe("\nAdd an Image to a Review based on the Review's id", () => {
+	let agent;
+	let xsrfToken;
+	let agentSpot;
+	let agent2;
+	let xsrfToken2;
+	let agent3;
+	let xsrfToken3;
+	let agent2Review;
+	let agent4;
+	let xsrfToken4;
 
 	before(async function () {
 		this.timeout(15000);
-		let agentArr = createManyAgents(apiBaseUrl, 3);
+		const agentArr = createManyAgents(apiBaseUrl, 3);
 		[agent, agent2, agent3] = agentArr;
 
-		let xsrfTokens = await fetchManyCsrfTokens(agentArr);
+		const xsrfTokens = await fetchManyCsrfTokens(agentArr);
 		[xsrfToken, xsrfToken2, xsrfToken3] = xsrfTokens;
 
 		await Promise.all(
@@ -38,15 +39,15 @@ describe("\nAdd an Image to a Review based on the Review's id", function () {
 		agent4 = createAgent(apiBaseUrl);
 		xsrfToken4 = await fetchCsrfToken(agent4);
 
-		let spotRes = await agentCreateSpot(agent, xsrfToken);
+		const spotRes = await agentCreateSpot(agent, xsrfToken);
 		agentSpot = spotRes.body;
 
-		let reviewRes = await agentCreateReview(agent2, xsrfToken2, agentSpot.id);
+		const reviewRes = await agentCreateReview(agent2, xsrfToken2, agentSpot.id);
 		agent2Review = reviewRes.body;
 	});
 
-	describe('POST /api/reviews/:reviewId/images', function () {
-		it('Correct Endpoint', function (done) {
+	describe('POST /api/reviews/:reviewId/images', () => {
+		it('Correct Endpoint', (done) => {
 			const imageData = {
 				url: 'imageTest.png',
 			};
@@ -56,13 +57,13 @@ describe("\nAdd an Image to a Review based on the Review's id", function () {
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
 
-		it('Authentication', function (done) {
+		it('Authentication', (done) => {
 			const imageData = {
 				url: `${generateUniqueUsername()}.png`,
 			};
@@ -72,13 +73,13 @@ describe("\nAdd an Image to a Review based on the Review's id", function () {
 				.set('X-XSRF-TOKEN', xsrfToken4)
 				.set('Accept', 'application/json')
 				.expect(401)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					done();
 				});
 		});
 
-		it('Authorization', function (done) {
+		it('Authorization', (done) => {
 			const imageData = {
 				url: `${generateUniqueUsername()}.png`,
 			};
@@ -88,15 +89,15 @@ describe("\nAdd an Image to a Review based on the Review's id", function () {
 				.set('Accept', 'application/json')
 				.send(imageData)
 				.expect(403)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					done();
 				});
 		});
 	});
 
-	describe('Response', function () {
-		it('Status Code - 201', function (done) {
+	describe('Response', () => {
+		it('Status Code - 201', (done) => {
 			const imageData = {
 				url: `${generateUniqueUsername()}.png`,
 			};
@@ -106,13 +107,13 @@ describe("\nAdd an Image to a Review based on the Review's id", function () {
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.expect(201)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					done();
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			const imageData = {
 				url: `${generateUniqueUsername()}.png`,
 			};
@@ -121,7 +122,7 @@ describe("\nAdd an Image to a Review based on the Review's id", function () {
 				.send(imageData)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken2)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.be.an('object');
 					expect(res.body).to.include.keys('id', 'url');
@@ -131,36 +132,36 @@ describe("\nAdd an Image to a Review based on the Review's id", function () {
 		});
 	});
 
-	describe("Error response: Couldn't find a Review with the specified id", function () {
-		it('Status Code - 404', function (done) {
+	describe("Error response: Couldn't find a Review with the specified id", () => {
+		it('Status Code - 404', (done) => {
 			const imageData = {
 				url: `${generateUniqueUsername()}.png`,
 			};
 			agent2
-				.post(`/reviews/2523532/images`)
+				.post('/reviews/2523532/images')
 				.send(imageData)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.expect('Content-Type', /json/)
 				.expect(404)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					done();
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			const imageData = {
 				url: `${generateUniqueUsername()}.png`,
 			};
 
 			agent2
-				.post(`/reviews/2523532/images`)
+				.post('/reviews/2523532/images')
 				.send(imageData)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 
 					expect(res.body).to.have.property(

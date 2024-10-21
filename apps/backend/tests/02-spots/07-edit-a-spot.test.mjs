@@ -1,17 +1,24 @@
 import { expect } from 'chai';
-import { apiBaseUrl } from '../utils/constants.mjs';
-import { createUniqueSpot } from '../utils/agent-helpers.mjs';
-import { expectedNeOrEditSpotKeys } from '../utils/err-helpers.mjs';
+import { before, describe, it } from 'mocha';
 import {
 	agentCreateSpot,
-	agentSignUp,
 	agentCreateSpotImage,
+	agentSignUp,
 	createManyAgents,
 	fetchManyCsrfTokens,
 } from '../utils/agent-factory.mjs';
+import { createUniqueSpot } from '../utils/agent-helpers.mjs';
+import { apiBaseUrl } from '../utils/constants.mjs';
+import { expectedNeOrEditSpotKeys } from '../utils/err-helpers.mjs';
 
-describe('\nEdit a Spot', function () {
-	let agent, xsrfToken, agentSpot, agent2, xsrfToken2, agentNonAuth, xsrfToken3;
+describe('\nEdit a Spot', () => {
+	let agent;
+	let xsrfToken;
+	let agentSpot;
+	let agent2;
+	let xsrfToken2;
+	let agentNonAuth;
+	let xsrfToken3;
 
 	before(async function () {
 		this.timeout(15000);
@@ -23,15 +30,15 @@ describe('\nEdit a Spot', function () {
 		]);
 		await agentSignUp(agent, xsrfToken);
 		await agentSignUp(agent2, xsrfToken2);
-		let res = await agentCreateSpot(agent, xsrfToken);
+		const res = await agentCreateSpot(agent, xsrfToken);
 		agentSpot = res.body;
-		let imageRes = await agentCreateSpotImage(agent, xsrfToken, agentSpot.id);
+		const imageRes = await agentCreateSpotImage(agent, xsrfToken, agentSpot.id);
 		agent.image = imageRes;
 	});
 
-	describe('PUT /api/spots/:spotId', function () {
-		it('Correct Endpoint', function (done) {
-			let validSpotId = agentSpot.id;
+	describe('PUT /api/spots/:spotId', () => {
+		it('Correct Endpoint', (done) => {
+			const validSpotId = agentSpot.id;
 			const spotData = createUniqueSpot();
 			agent
 				.put(`/spots/${validSpotId}`)
@@ -39,46 +46,46 @@ describe('\nEdit a Spot', function () {
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
 
-		it('Authentication', function (done) {
+		it('Authentication', (done) => {
 			const spotData = createUniqueSpot();
-			let validSpotId = agentSpot.id;
+			const validSpotId = agentSpot.id;
 			agentNonAuth
 				.put(`/spots/${validSpotId}`)
 				.send(spotData)
 				.set('X-XSRF-TOKEN', xsrfToken3)
 				.set('Accept', 'application/json')
 				.expect(401)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					done();
 				});
 		});
 
-		it('Authorization', function (done) {
+		it('Authorization', (done) => {
 			const spotData = createUniqueSpot();
-			let validSpotId = agentSpot.id;
+			const validSpotId = agentSpot.id;
 			agent2
 				.put(`/spots/${validSpotId}`)
 				.send(spotData)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.expect(403)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					done();
 				});
 		});
 	});
 
-	describe('Response', function () {
-		it('Status Code - 200', function (done) {
-			let validSpotId = agentSpot.id;
+	describe('Response', () => {
+		it('Status Code - 200', (done) => {
+			const validSpotId = agentSpot.id;
 			const spotData = createUniqueSpot();
 			agent
 				.put(`/spots/${validSpotId}`)
@@ -87,13 +94,13 @@ describe('\nEdit a Spot', function () {
 				.set('X-XSRF-TOKEN', xsrfToken)
 				.expect('Content-Type', /json/)
 				.expect(200)
-				.end(function (err, res) {
+				.end((_err, _res) => {
 					done();
 				});
 		});
 
-		it('Body Matches Api Docs', function (done) {
-			let validSpotId = agentSpot.id;
+		it('Body Matches Api Docs', (done) => {
+			const validSpotId = agentSpot.id;
 			const spotData = createUniqueSpot();
 			agent
 				.put(`/spots/${validSpotId}`)
@@ -102,7 +109,7 @@ describe('\nEdit a Spot', function () {
 				.set('X-XSRF-TOKEN', xsrfToken)
 				.expect('Content-Type', /json/)
 				.expect(200)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.include.keys(expectedNeOrEditSpotKeys);
 					expect(res.body.name).to.equal(spotData.name);
@@ -112,12 +119,12 @@ describe('\nEdit a Spot', function () {
 		});
 	});
 
-	describe('Error Response: Body validation error', function () {
-		it('Status Code - 400', function (done) {
+	describe('Error Response: Body validation error', () => {
+		it('Status Code - 400', (done) => {
 			const incompleteData = {
 				city: 'San Francisco',
 			};
-			let validSpotId = agentSpot.id;
+			const validSpotId = agentSpot.id;
 			agent
 				.put(`/spots/${validSpotId}`)
 				.set('Accept', 'application/json')
@@ -125,16 +132,16 @@ describe('\nEdit a Spot', function () {
 				.send(incompleteData)
 				.expect('Content-Type', /json/)
 				.expect(400)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			const incompleteData = {
 				city: 'San Francisco',
 			};
-			let validSpotId = agentSpot.id;
+			const validSpotId = agentSpot.id;
 			agent
 				.put(`/spots/${validSpotId}`)
 				.set('Accept', 'application/json')
@@ -142,7 +149,7 @@ describe('\nEdit a Spot', function () {
 				.send(incompleteData)
 				.expect('Content-Type', /json/)
 				.expect(400)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.have.property('message');
 					expect(res.body.errors).to.include.keys(
@@ -160,8 +167,8 @@ describe('\nEdit a Spot', function () {
 		});
 	});
 
-	describe("Error response: Couldn't find a Spot with the specified id", function () {
-		it('Status Code - 404', function (done) {
+	describe("Error response: Couldn't find a Spot with the specified id", () => {
+		it('Status Code - 404', (done) => {
 			const invalidSpotId = 923058;
 			const spotData = createUniqueSpot();
 			agent
@@ -171,13 +178,13 @@ describe('\nEdit a Spot', function () {
 				.send(spotData)
 				.expect('Content-Type', /json/)
 				.expect(404)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			const invalidSpotId = 923058;
 			const spotData = createUniqueSpot();
 			agent
@@ -186,7 +193,7 @@ describe('\nEdit a Spot', function () {
 				.set('X-XSRF-TOKEN', xsrfToken)
 				.send(spotData)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.have.property(
 						'message',

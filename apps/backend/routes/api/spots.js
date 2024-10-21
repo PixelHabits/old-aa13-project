@@ -349,12 +349,13 @@ router.get('/', validateQuery, async (req, res) => {
 
 		const where = {};
 
-		if (!isNaN(minLat)) where.lat = { [Op.gte]: minLat };
-		if (!isNaN(maxLat)) where.lat = { ...where.lat, [Op.lte]: maxLat };
-		if (!isNaN(minLng)) where.lng = { [Op.gte]: minLng };
-		if (!isNaN(maxLng)) where.lng = { ...where.lng, [Op.lte]: maxLng };
-		if (!isNaN(minPrice) && minPrice >= 0) where.price = { [Op.gte]: minPrice };
-		if (!isNaN(maxPrice) && maxPrice >= 0)
+		if (!Number.isNaN(minLat)) where.lat = { [Op.gte]: minLat };
+		if (!Number.isNaN(maxLat)) where.lat = { ...where.lat, [Op.lte]: maxLat };
+		if (!Number.isNaN(minLng)) where.lng = { [Op.gte]: minLng };
+		if (!Number.isNaN(maxLng)) where.lng = { ...where.lng, [Op.lte]: maxLng };
+		if (!Number.isNaN(minPrice) && minPrice >= 0)
+			where.price = { [Op.gte]: minPrice };
+		if (!Number.isNaN(maxPrice) && maxPrice >= 0)
 			where.price = { ...where.price, [Op.lte]: maxPrice };
 
 		const spots = await Spot.findAll({

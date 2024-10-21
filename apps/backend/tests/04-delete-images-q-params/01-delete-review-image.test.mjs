@@ -1,50 +1,51 @@
 import { expect } from 'chai';
-import { apiBaseUrl } from '../utils/constants.mjs';
+import { before, describe, it } from 'mocha';
 import {
-	agentSignUp,
-	agentCreateSpot,
 	agentCreateReview,
 	agentCreateReviewImage,
-	createManyAgents,
-	fetchManyCsrfTokens,
+	agentCreateSpot,
+	agentSignUp,
 	createAgent,
+	createManyAgents,
 	fetchCsrfToken,
+	fetchManyCsrfTokens,
 } from '../utils/agent-factory.mjs';
+import { apiBaseUrl } from '../utils/constants.mjs';
 
-describe('\nDelete a Review Image', function () {
-	let agent,
-		xsrfToken,
-		agentSpot,
-		agent2,
-		xsrfToken2,
-		agent3,
-		xsrfToken3,
-		agent2Review,
-		reviewImage,
-		agent3Review3,
-		reviewImage3,
-		agent4,
-		xsrfToken4;
+describe('\nDelete a Review Image', () => {
+	let agent;
+	let xsrfToken;
+	let agentSpot;
+	let agent2;
+	let xsrfToken2;
+	let agent3;
+	let xsrfToken3;
+	let agent2Review;
+	let reviewImage;
+	let agent3Review3;
+	let reviewImage3;
+	let agent4;
+	let xsrfToken4;
 
 	before(async function () {
 		this.timeout(15000);
-		let agentArr = createManyAgents(apiBaseUrl, 3);
+		const agentArr = createManyAgents(apiBaseUrl, 3);
 		[agent, agent2, agent3] = agentArr;
 
-		let xsrfTokens = await fetchManyCsrfTokens(agentArr);
+		const xsrfTokens = await fetchManyCsrfTokens(agentArr);
 		[xsrfToken, xsrfToken2, xsrfToken3] = xsrfTokens;
 
 		await Promise.all(
 			agentArr.map((el, idx) => agentSignUp(el, xsrfTokens[idx])),
 		);
 
-		let spotRes = await agentCreateSpot(agent, xsrfToken);
+		const spotRes = await agentCreateSpot(agent, xsrfToken);
 		agentSpot = spotRes.body;
 
 		//! review 1
-		let reviewRes = await agentCreateReview(agent2, xsrfToken2, agentSpot.id);
+		const reviewRes = await agentCreateReview(agent2, xsrfToken2, agentSpot.id);
 		agent2Review = reviewRes.body;
-		let reviewImageRes = await agentCreateReviewImage(
+		const reviewImageRes = await agentCreateReviewImage(
 			agent2,
 			xsrfToken2,
 			agent2Review.id,
@@ -53,9 +54,13 @@ describe('\nDelete a Review Image', function () {
 		reviewImage = reviewImageRes.body;
 
 		//! review 2
-		let reviewRes3 = await agentCreateReview(agent3, xsrfToken3, agentSpot.id);
+		const reviewRes3 = await agentCreateReview(
+			agent3,
+			xsrfToken3,
+			agentSpot.id,
+		);
 		agent3Review3 = reviewRes3.body;
-		let reviewImageRes3 = await agentCreateReviewImage(
+		const reviewImageRes3 = await agentCreateReviewImage(
 			agent3,
 			xsrfToken3,
 			agent3Review3.id,
@@ -66,63 +71,63 @@ describe('\nDelete a Review Image', function () {
 		xsrfToken4 = await fetchCsrfToken(agent4);
 	});
 
-	describe('DELETE /api/review-images/:imageId', function () {
-		it('Correct Endpoint', function (done) {
+	describe('DELETE /api/review-images/:imageId', () => {
+		it('Correct Endpoint', (done) => {
 			agent2
 				.delete(`/review-images/${reviewImage.id}`)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((_err, _res) => {
 					done();
 				});
 		});
 
-		it('Authentication', function (done) {
+		it('Authentication', (done) => {
 			agent4
 				.delete(`/review-images/${reviewImage.id}`)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken4)
 				.expect(401)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					done();
 				});
 		});
 
-		it('Authorization', function (done) {
+		it('Authorization', (done) => {
 			agent2
 				.delete(`/review-images/${reviewImage3.id}`)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.expect(403)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					done();
 				});
 		});
 	});
 
-	describe('Response', function () {
-		it('Status Code - 200', function (done) {
+	describe('Response', () => {
+		it('Status Code - 200', (done) => {
 			agent2
 				.delete(`/review-images/${reviewImage.id}`)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.expect('Content-Type', /json/)
 				.expect(200)
-				.end(function (err, res) {
+				.end((_err, _res) => {
 					done();
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			agent3
 				.delete(`/review-images/${reviewImage3.id}`)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken3)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.have.property('message', 'Successfully deleted');
 					done();
@@ -130,25 +135,25 @@ describe('\nDelete a Review Image', function () {
 		});
 	});
 
-	describe("Error response: Couldn't find a Review Image with the specified id", function () {
-		it('Status Code - 404', function (done) {
+	describe("Error response: Couldn't find a Review Image with the specified id", () => {
+		it('Status Code - 404', (done) => {
 			agent2
-				.delete(`/review-images/252352352`)
+				.delete('/review-images/252352352')
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.expect('Content-Type', /json/)
 				.expect(404)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					done();
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			agent2
-				.delete(`/review-images/252352352`)
+				.delete('/review-images/252352352')
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.have.property(
 						'message',

@@ -1,53 +1,56 @@
 import { expect } from 'chai';
+import { before, describe, it } from 'mocha';
+import {
+	agentCreateSpot,
+	agentCreateSpotImage,
+	agentSignUp,
+	createAgent,
+	fetchCsrfToken,
+} from '../utils/agent-factory.mjs';
 import { apiBaseUrl } from '../utils/constants.mjs';
 import { expectedSpotByIdKeys } from '../utils/err-helpers.mjs';
-import {
-	createAgent,
-	agentCreateSpot,
-	fetchCsrfToken,
-	agentSignUp,
-	agentCreateSpotImage,
-} from '../utils/agent-factory.mjs';
 
-describe('\nGet details of a Spot from an id', function () {
-	let agent, xsrfToken, spotId;
+describe('\nGet details of a Spot from an id', () => {
+	let agent;
+	let xsrfToken;
+	let spotId;
 
 	before(async function () {
 		this.timeout(15000);
 		agent = createAgent(apiBaseUrl);
 		xsrfToken = await fetchCsrfToken(agent);
 		await agentSignUp(agent, xsrfToken);
-		let res = await agentCreateSpot(agent, xsrfToken);
+		const res = await agentCreateSpot(agent, xsrfToken);
 		spotId = res.body.id;
-		let imageRes = await agentCreateSpotImage(agent, xsrfToken, spotId);
+		const imageRes = await agentCreateSpotImage(agent, xsrfToken, spotId);
 		agent.image = imageRes;
 	});
-	describe('GET /api/spots/:spotId', function () {
-		it('Correct Endpoint', function (done) {
-			agent.get(`/spots/${spotId}`).end(function (err, res) {
+	describe('GET /api/spots/:spotId', () => {
+		it('Correct Endpoint', (done) => {
+			agent.get(`/spots/${spotId}`).end((err, _res) => {
 				expect(err).to.not.exist;
 				done();
 			});
 		});
 	});
 
-	describe('Response', function () {
-		it('Status Code - 200', function (done) {
+	describe('Response', () => {
+		it('Status Code - 200', (done) => {
 			agent
 				.get(`/spots/${spotId}`)
 				.expect(200)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			agent
 				.get(`/spots/${spotId}`)
 				.expect('Content-Type', /json/)
 				.expect(200)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.be.an('object');
 					expect(res.body).to.include.keys(expectedSpotByIdKeys);
@@ -65,26 +68,26 @@ describe('\nGet details of a Spot from an id', function () {
 		});
 	});
 
-	describe('Error Response', function () {
-		it('Status Code - 404', function (done) {
+	describe('Error Response', () => {
+		it('Status Code - 404', (done) => {
 			const nonExistentSpotId = 2352351;
 			agent
 				.get(`/spots/${nonExistentSpotId}`)
 				.expect('Content-Type', /json/)
 				.expect(404)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 
 					done();
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			const nonExistentSpotId = 2352351;
 			agent
 				.get(`/spots/${nonExistentSpotId}`)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.have.property(
 						'message',

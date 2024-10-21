@@ -1,25 +1,24 @@
 import { expect } from 'chai';
-import { apiBaseUrl } from '../utils/constants.mjs';
+import { before, describe, it } from 'mocha';
 import {
-	createAgent,
-	agentCreateSpot,
-	fetchCsrfToken,
-	agentSignUp,
 	agentCreateReview,
+	agentCreateSpot,
+	agentSignUp,
 	createManyAgents,
 	fetchManyCsrfTokens,
 } from '../utils/agent-factory.mjs';
+import { apiBaseUrl } from '../utils/constants.mjs';
 
-describe('\nGet all Reviews of the Current User', function () {
-	let agent,
-		xsrfToken,
-		agent2,
-		xsrfToken2,
-		agentSpot,
-		agent2Spot,
-		agentReview,
-		agent3,
-		xsrfToken3;
+describe('\nGet all Reviews of the Current User', () => {
+	let agent;
+	let xsrfToken;
+	let agent2;
+	let xsrfToken2;
+	let _agentSpot;
+	let agent2Spot;
+	let _agentReview;
+	let agent3;
+	let xsrfToken3;
 
 	before(async function () {
 		this.timeout(15000);
@@ -31,56 +30,56 @@ describe('\nGet all Reviews of the Current User', function () {
 		]);
 
 		await agentSignUp(agent, xsrfToken);
-		let res = await agentCreateSpot(agent, xsrfToken);
-		agentSpot = res.body;
+		const res = await agentCreateSpot(agent, xsrfToken);
+		_agentSpot = res.body;
 
 		await agentSignUp(agent2, xsrfToken2);
-		let agent2Res = await agentCreateSpot(agent2, xsrfToken2);
+		const agent2Res = await agentCreateSpot(agent2, xsrfToken2);
 		agent2Spot = agent2Res.body;
 
-		let reviewRes = await agentCreateReview(agent, xsrfToken, agent2Spot.id);
-		agentReview = reviewRes.body;
+		const reviewRes = await agentCreateReview(agent, xsrfToken, agent2Spot.id);
+		_agentReview = reviewRes.body;
 	});
 
-	describe('GET /api/reviews/current', function () {
-		it('Correct Endpoint', function (done) {
-			agent.get('/reviews/current').end(function (err, res) {
+	describe('GET /api/reviews/current', () => {
+		it('Correct Endpoint', (done) => {
+			agent.get('/reviews/current').end((err, _res) => {
 				expect(err).to.not.exist;
 				done();
 			});
 		});
 
-		it('Authentication', function (done) {
+		it('Authentication', (done) => {
 			agent3
 				.get('/reviews/current')
 				.set('X-XSRF-TOKEN', xsrfToken3)
 				.expect(401)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					done();
 				});
 		});
 	});
 
-	describe('Response', function () {
-		it('Status Code - 200', function (done) {
+	describe('Response', () => {
+		it('Status Code - 200', (done) => {
 			agent
 				.get('/reviews/current')
 				.expect(200)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			agent
 				.get('/reviews/current')
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken)
 				.expect('Content-Type', /json/)
 				.expect(200)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.be.an('object');
 					expect(res.body).to.have.property('Reviews').that.is.an('array');

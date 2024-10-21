@@ -1,38 +1,39 @@
 import { expect } from 'chai';
-import { apiBaseUrl } from '../utils/constants.mjs';
+import { before, describe, it } from 'mocha';
 import {
-	agentSignUp,
 	agentCreateSpot,
-	createManyAgents,
-	fetchManyCsrfTokens,
+	agentSignUp,
 	createAgent,
+	createManyAgents,
 	fetchCsrfToken,
+	fetchManyCsrfTokens,
 } from '../utils/agent-factory.mjs';
+import { apiBaseUrl } from '../utils/constants.mjs';
 
-describe("\nCreate a Review for a Spot based on the Spot's id", function () {
-	let agent,
-		xsrfToken,
-		agentSpot,
-		agent2,
-		xsrfToken2,
-		agent3,
-		xsrfToken3,
-		agent4,
-		xsrfToken4,
-		agent5,
-		xsrfToken5,
-		agent6,
-		xsrfToken6,
-		agent7,
-		xsrfToken7;
+describe("\nCreate a Review for a Spot based on the Spot's id", () => {
+	let agent;
+	let xsrfToken;
+	let agentSpot;
+	let agent2;
+	let xsrfToken2;
+	let agent3;
+	let xsrfToken3;
+	let agent4;
+	let xsrfToken4;
+	let agent5;
+	let xsrfToken5;
+	let _agent6;
+	let _xsrfToken6;
+	let agent7;
+	let xsrfToken7;
 
 	before(async function () {
 		this.timeout(15000);
-		let agentArr = createManyAgents(apiBaseUrl, 6);
-		[agent, agent2, agent3, agent4, agent5, agent6] = agentArr;
+		const agentArr = createManyAgents(apiBaseUrl, 6);
+		[agent, agent2, agent3, agent4, agent5, _agent6] = agentArr;
 
-		let xsrfTokens = await fetchManyCsrfTokens(agentArr);
-		[xsrfToken, xsrfToken2, xsrfToken3, xsrfToken4, xsrfToken5, xsrfToken6] =
+		const xsrfTokens = await fetchManyCsrfTokens(agentArr);
+		[xsrfToken, xsrfToken2, xsrfToken3, xsrfToken4, xsrfToken5, _xsrfToken6] =
 			xsrfTokens;
 
 		await Promise.all(
@@ -41,12 +42,12 @@ describe("\nCreate a Review for a Spot based on the Spot's id", function () {
 		agent7 = createAgent(apiBaseUrl);
 		xsrfToken7 = await fetchCsrfToken(agent7);
 
-		let spotRes = await agentCreateSpot(agent, xsrfToken);
+		const spotRes = await agentCreateSpot(agent, xsrfToken);
 		agentSpot = spotRes.body;
 	});
 
-	describe('POST /api/spots/:spotId/reviews', function () {
-		it('Correct Endpoint', function (done) {
+	describe('POST /api/spots/:spotId/reviews', () => {
+		it('Correct Endpoint', (done) => {
 			const reviewData = {
 				review: 'This was an awesome spot for testing!',
 				stars: 5,
@@ -56,13 +57,13 @@ describe("\nCreate a Review for a Spot based on the Spot's id", function () {
 				.send(reviewData)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken2)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
 
-		it('Authentication', function (done) {
+		it('Authentication', (done) => {
 			const reviewData = {
 				review: 'This was a cool spot for testing!',
 				stars: 5,
@@ -73,15 +74,15 @@ describe("\nCreate a Review for a Spot based on the Spot's id", function () {
 				.set('X-XSRF-TOKEN', xsrfToken7)
 				.set('Accept', 'application/json')
 				.expect(401)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					done();
 				});
 		});
 	});
 
-	describe('Response', function () {
-		it('Status Code - 201', function (done) {
+	describe('Response', () => {
+		it('Status Code - 201', (done) => {
 			const reviewData = {
 				review: 'This was an amazing spot for testing!',
 				stars: 5,
@@ -92,13 +93,13 @@ describe("\nCreate a Review for a Spot based on the Spot's id", function () {
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken4)
 				.expect(201)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			const reviewData = {
 				review: 'This was an awesome spot for testing!',
 				stars: 5,
@@ -109,7 +110,7 @@ describe("\nCreate a Review for a Spot based on the Spot's id", function () {
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken5)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.be.an('object');
 					expect(res.body).to.include.keys(
@@ -128,8 +129,8 @@ describe("\nCreate a Review for a Spot based on the Spot's id", function () {
 		});
 	});
 
-	describe('Error Response: Body validation errors', function () {
-		it('Status Code - 400', function (done) {
+	describe('Error Response: Body validation errors', () => {
+		it('Status Code - 400', (done) => {
 			const reviewData = {
 				review: '',
 				stars: 6,
@@ -142,7 +143,7 @@ describe("\nCreate a Review for a Spot based on the Spot's id", function () {
 				.set('X-XSRF-TOKEN', xsrfToken3)
 				.expect('Content-Type', /json/)
 				.expect(400)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.have.property('message');
 					expect(res.body.errors).to.include.keys('review', 'stars');
@@ -150,7 +151,7 @@ describe("\nCreate a Review for a Spot based on the Spot's id", function () {
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			const reviewData = {
 				review: '',
 				stars: 6,
@@ -161,7 +162,7 @@ describe("\nCreate a Review for a Spot based on the Spot's id", function () {
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken3)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.have.property('message');
 					expect(res.body.errors).to.include.keys('review', 'stars');
@@ -170,16 +171,16 @@ describe("\nCreate a Review for a Spot based on the Spot's id", function () {
 		});
 	});
 
-	describe("Error Response: Couldn't find a Spot with the specified id", function () {
-		it('Status Code - 404', function (done) {
+	describe("Error Response: Couldn't find a Spot with the specified id", () => {
+		it('Status Code - 404', (done) => {
 			agent
-				.post(`/spots/235235/reviews`)
+				.post('/spots/235235/reviews')
 				.send({ review: 'Great spot for testing reviews!', stars: 5 })
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken)
 				.expect('Content-Type', /json/)
 				.expect(404)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.have.property(
 						'message',
@@ -189,14 +190,14 @@ describe("\nCreate a Review for a Spot based on the Spot's id", function () {
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			agent
-				.post(`/spots/235235/reviews`)
+				.post('/spots/235235/reviews')
 				.send({ review: 'Great spot for testing reviews!', stars: 5 })
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.have.property(
 						'message',
@@ -207,8 +208,8 @@ describe("\nCreate a Review for a Spot based on the Spot's id", function () {
 		});
 	});
 
-	describe('Error Response: Review from the current user already exists for the Spot', function () {
-		it('Status Code - 500', function (done) {
+	describe('Error Response: Review from the current user already exists for the Spot', () => {
+		it('Status Code - 500', (done) => {
 			const reviewData = {
 				review: 'This was an awesome spot for testing reviews!',
 				stars: 5,
@@ -220,7 +221,7 @@ describe("\nCreate a Review for a Spot based on the Spot's id", function () {
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.expect('Content-Type', /json/)
 				.expect(500)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.have.property(
 						'message',
@@ -230,7 +231,7 @@ describe("\nCreate a Review for a Spot based on the Spot's id", function () {
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			const reviewData = {
 				review: 'This was an awesome spot for testing reviews!',
 				stars: 5,
@@ -241,7 +242,7 @@ describe("\nCreate a Review for a Spot based on the Spot's id", function () {
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.have.property(
 						'message',

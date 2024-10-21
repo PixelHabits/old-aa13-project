@@ -1,5 +1,3 @@
-'use strict';
-
 /** @type {import('sequelize-cli').Migration} */
 
 const { User } = require('../models');
@@ -11,7 +9,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 module.exports = {
-	async up(queryInterface, Sequelize) {
+	async up(_queryInterface, _Sequelize) {
 		await User.bulkCreate(
 			[
 				{

@@ -1,25 +1,26 @@
 import { expect } from 'chai';
-import { apiBaseUrl } from '../utils/constants.mjs';
+import { before, describe, it } from 'mocha';
 import {
-	createAgent,
-	agentSignUp,
-	fetchCsrfToken,
 	agentCreateSpot,
 	agentCreateSpotImage,
+	agentSignUp,
+	createAgent,
+	fetchCsrfToken,
 } from '../utils/agent-factory.mjs';
+import { apiBaseUrl } from '../utils/constants.mjs';
 
-describe('\nDelete a Spot Image', function () {
-	let agent,
-		xsrfToken,
-		spot,
-		spotImage,
-		spotImage1,
-		xsrfToken2,
-		agent2,
-		spot2,
-		spotImage2,
-		agent3,
-		xsrfToken3;
+describe('\nDelete a Spot Image', () => {
+	let agent;
+	let xsrfToken;
+	let spot;
+	let spotImage;
+	let spotImage1;
+	let xsrfToken2;
+	let agent2;
+	let spot2;
+	let spotImage2;
+	let agent3;
+	let xsrfToken3;
 
 	before(async function () {
 		this.timeout(15000);
@@ -28,13 +29,13 @@ describe('\nDelete a Spot Image', function () {
 		xsrfToken = await fetchCsrfToken(agent);
 		await agentSignUp(agent, xsrfToken);
 
-		let spotRes = await agentCreateSpot(agent, xsrfToken);
+		const spotRes = await agentCreateSpot(agent, xsrfToken);
 		spot = spotRes.body;
 
-		let imageRes = await agentCreateSpotImage(agent, xsrfToken, spot.id);
+		const imageRes = await agentCreateSpotImage(agent, xsrfToken, spot.id);
 		spotImage = imageRes.body;
 
-		let imageRes1 = await agentCreateSpotImage(agent, xsrfToken, spot.id);
+		const imageRes1 = await agentCreateSpotImage(agent, xsrfToken, spot.id);
 		spotImage1 = imageRes1.body;
 
 		//! Agent 2
@@ -43,77 +44,77 @@ describe('\nDelete a Spot Image', function () {
 		xsrfToken2 = await fetchCsrfToken(agent2);
 		await agentSignUp(agent2, xsrfToken2);
 
-		let spotRes2 = await agentCreateSpot(agent2, xsrfToken2);
+		const spotRes2 = await agentCreateSpot(agent2, xsrfToken2);
 		spot2 = spotRes2.body;
 
-		let imageRes2 = await agentCreateSpotImage(agent2, xsrfToken2, spot2.id);
+		const imageRes2 = await agentCreateSpotImage(agent2, xsrfToken2, spot2.id);
 		spotImage2 = imageRes2.body;
 
 		agent3 = createAgent(apiBaseUrl);
 		xsrfToken3 = await fetchCsrfToken(agent3);
 	});
 
-	describe('DELETE /api/spot-images/:imageId', function () {
-		it('Correct Endpoint', function (done) {
+	describe('DELETE /api/spot-images/:imageId', () => {
+		it('Correct Endpoint', (done) => {
 			agent
 				.delete(`/spot-images/${spotImage.id}`)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
 
-		it('Authentication', function (done) {
+		it('Authentication', (done) => {
 			agent3
 				.delete(`/spot-images/${spotImage.id}`)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken3)
 				.expect('Content-Type', /json/)
 				.expect(401)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					return done();
 				});
 		});
 
-		it('Authorization', function (done) {
+		it('Authorization', (done) => {
 			agent
 				.delete(`/spot-images/${spotImage2.id}`)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken)
 				.expect('Content-Type', /json/)
 				.expect(403)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					return done();
 				});
 		});
 	});
 
-	describe('Response', function () {
-		it('Status Code - 200', function (done) {
+	describe('Response', () => {
+		it('Status Code - 200', (done) => {
 			agent
 				.delete(`/spot-images/${spotImage.id}`)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken)
 				.expect('Content-Type', /json/)
 				.expect(200)
-				.end(function (err, res) {
+				.end((_err, _res) => {
 					done();
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			agent
 				.delete(`/spot-images/${spotImage1.id}`)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken)
 				.expect('Content-Type', /json/)
 
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.have.property('message', 'Successfully deleted');
 					done();
@@ -121,24 +122,24 @@ describe('\nDelete a Spot Image', function () {
 		});
 	});
 
-	describe("Error response: Couldn't find a Spot Image with the specified id", function () {
-		it('Status Code - 404', function (done) {
+	describe("Error response: Couldn't find a Spot Image with the specified id", () => {
+		it('Status Code - 404', (done) => {
 			agent
-				.delete(`/spot-images/2352352`)
+				.delete('/spot-images/2352352')
 				.expect('Content-Type', /json/)
 				.set('X-XSRF-TOKEN', xsrfToken)
 				.expect(404)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					done();
 				});
 		});
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			agent
-				.delete(`/spot-images/2352352`)
+				.delete('/spot-images/2352352')
 				.expect('Content-Type', /json/)
 				.set('X-XSRF-TOKEN', xsrfToken)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.have.property(
 						'message',

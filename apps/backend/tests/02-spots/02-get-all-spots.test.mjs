@@ -1,42 +1,43 @@
 import { assert, expect } from 'chai';
-import { apiBaseUrl } from '../utils/constants.mjs';
+import { before, describe, it } from 'mocha';
 import { createAgent } from '../utils/agent-factory.mjs';
+import { apiBaseUrl } from '../utils/constants.mjs';
 
-describe('Get all Spots', function () {
+describe('Get all Spots', () => {
 	let agent;
-	before(async function () {
+	before(function () {
 		this.timeout(15000);
 		agent = createAgent(apiBaseUrl);
 	});
 
-	describe('GET /api/spots', function () {
-		it('Correct Endpoint', function (done) {
-			agent.get('/spots').end(function (err, res) {
+	describe('GET /api/spots', () => {
+		it('Correct Endpoint', (done) => {
+			agent.get('/spots').end((err, _res) => {
 				expect(err).to.not.exist;
 				done();
 			});
 		});
 	});
-	describe('Response', function () {
-		it('Status Code - 200', function (done) {
+	describe('Response', () => {
+		it('Status Code - 200', (done) => {
 			agent
 				.get('/spots')
 				.expect(200)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
-		it('Body Matches API Docs', function (done) {
-			let errors = [];
+		it('Body Matches API Docs', (done) => {
+			const errors = [];
 			agent
 				.get('/spots')
 				.set('Accept', 'application/json')
 				.expect(200)
 				.expect('Content-Type', /json/)
 
-				.end(function (err, res) {
-					if (err) errors.push('Error in second request: ' + err.message);
+				.end((err, res) => {
+					if (err) errors.push(`Error in second request: ${err.message}`);
 					try {
 						const spots = res.body.Spots;
 
@@ -111,7 +112,7 @@ describe('Get all Spots', function () {
 						expect(spot).to.have.property('avgRating');
 						expect(spot).to.have.property('previewImage');
 					} catch (err) {
-						errors.push('Assertion error: ' + err.message);
+						errors.push(`Assertion error: ${err.message}`);
 					}
 
 					if (errors.length > 0) {

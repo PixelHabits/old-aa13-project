@@ -1,58 +1,63 @@
 import { expect } from 'chai';
-import { apiBaseUrl } from '../utils/constants.mjs';
-import { expectedSpotKeys } from '../utils/err-helpers.mjs';
+import { before, describe, it } from 'mocha';
 import {
 	agentCreateSpot,
 	agentSignUp,
 	createManyAgents,
 	fetchManyCsrfTokens,
 } from '../utils/agent-factory.mjs';
+import { apiBaseUrl } from '../utils/constants.mjs';
+import { expectedSpotKeys } from '../utils/err-helpers.mjs';
 
-describe('Add Query Filters to Get All Spots', function () {
-	let agent, xsrfToken, agentSpot, agent2, xsrfToken2;
+describe('Add Query Filters to Get All Spots', () => {
+	let agent;
+	let xsrfToken;
+	let _agentSpot;
+	let agent2;
+	let _xsrfToken2;
 
 	before(async function () {
 		this.timeout(15000);
 		[agent, agent2] = createManyAgents(apiBaseUrl, 2);
-		[xsrfToken, xsrfToken2] = await fetchManyCsrfTokens([agent, agent2]);
+		[xsrfToken, _xsrfToken2] = await fetchManyCsrfTokens([agent, agent2]);
 		await agentSignUp(agent, xsrfToken);
-		let res = await agentCreateSpot(agent, xsrfToken);
-		agentSpot = res.body;
+		const res = await agentCreateSpot(agent, xsrfToken);
+		_agentSpot = res.body;
 	});
 
-	describe('GET /api/spot?query=params', function () {
-		it('Correct Endpoint', function (done) {
+	describe('GET /api/spot?query=params', () => {
+		it('Correct Endpoint', (done) => {
 			agent
 				.get('/spots')
 				.query({})
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
 	});
 
-	describe('Response', function () {
-		it('Status Code - 200', function (done) {
+	describe('Response', () => {
+		it('Status Code - 200', (done) => {
 			agent
 				.get('/spots')
 				.query({})
 				.expect('Content-Type', /json/)
 				.expect(200)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
 
-		describe('Body Matches API Docs', function () {
-			it('No filter', function (done) {
+		describe('Body Matches API Docs', () => {
+			it('No filter', (done) => {
 				agent
 					.get('/spots')
 					.query({})
 					.expect('Content-Type', /json/)
-					.end(function (err, res) {
+					.end((err, res) => {
 						expect(err).to.not.exist;
 						expect(res.body).to.be.an('object');
 						expect(res.body).to.have.property('Spots').that.is.an('array');
@@ -67,7 +72,7 @@ describe('Add Query Filters to Get All Spots', function () {
 					});
 			});
 
-			it('returns spots filtered by lat/lng', function (done) {
+			it('returns spots filtered by lat/lng', (done) => {
 				agent
 					.get('/spots')
 					.query({
@@ -78,14 +83,14 @@ describe('Add Query Filters to Get All Spots', function () {
 					})
 					.expect('Content-Type', /json/)
 					.expect(200)
-					.end(function (err, res) {
+					.end((err, res) => {
 						expect(err).to.not.exist;
 						expect(res.body).to.have.property('Spots').that.is.an('array');
 						done();
 					});
 			});
 
-			it('returns spots filtered by price range', function (done) {
+			it('returns spots filtered by price range', (done) => {
 				agent
 					.get('/spots')
 					.query({
@@ -94,7 +99,7 @@ describe('Add Query Filters to Get All Spots', function () {
 					})
 					.expect('Content-Type', /json/)
 					.expect(200)
-					.end(function (err, res) {
+					.end((err, res) => {
 						expect(err).to.not.exist;
 						expect(res.body).to.have.property('Spots').that.is.an('array');
 						done();
@@ -103,9 +108,9 @@ describe('Add Query Filters to Get All Spots', function () {
 		});
 	});
 
-	describe('Error Response: Query parameter validation errors', function () {
-		describe('Status Code - 400', function () {
-			it('returns an error for invalid query parameters', function (done) {
+	describe('Error Response: Query parameter validation errors', () => {
+		describe('Status Code - 400', () => {
+			it('returns an error for invalid query parameters', (done) => {
 				agent
 					.get('/spots')
 					.query({
@@ -114,13 +119,13 @@ describe('Add Query Filters to Get All Spots', function () {
 					})
 					.expect('Content-Type', /json/)
 					.expect(400)
-					.end(function (err, res) {
+					.end((err, _res) => {
 						expect(err).to.not.exist;
 						done();
 					});
 			});
 
-			it('returns an error for invalid min/max lng', function (done) {
+			it('returns an error for invalid min/max lng', (done) => {
 				agent
 					.get('/spots')
 					.query({
@@ -129,14 +134,14 @@ describe('Add Query Filters to Get All Spots', function () {
 					})
 					.expect('Content-Type', /json/)
 					.expect(400)
-					.end(function (err, res) {
+					.end((_err, _res) => {
 						done();
 					});
 			});
 		});
 
-		describe('Body Matches API Docs', function () {
-			it('returns an error for invalid query parameters', function (done) {
+		describe('Body Matches API Docs', () => {
+			it('returns an error for invalid query parameters', (done) => {
 				agent
 					.get('/spots')
 					.query({
@@ -144,7 +149,7 @@ describe('Add Query Filters to Get All Spots', function () {
 						page: 'testing',
 					})
 					.expect('Content-Type', /json/)
-					.end(function (err, res) {
+					.end((err, res) => {
 						expect(err).to.not.exist;
 						expect(res.body).to.have.property('message');
 						expect(res.body.errors).to.include.keys('page', 'size');
@@ -152,7 +157,7 @@ describe('Add Query Filters to Get All Spots', function () {
 					});
 			});
 
-			it('returns an error for invalid min/max lng', function (done) {
+			it('returns an error for invalid min/max lng', (done) => {
 				agent
 					.get('/spots')
 					.query({
@@ -160,7 +165,7 @@ describe('Add Query Filters to Get All Spots', function () {
 						minLng: 'ceremony',
 					})
 					.expect('Content-Type', /json/)
-					.end(function (err, res) {
+					.end((err, res) => {
 						expect(err).to.not.exist;
 						expect(res.body).to.have.property('message');
 						expect(res.body.errors).to.include.keys('minLat', 'minLng');

@@ -1,5 +1,3 @@
-'use strict';
-
 /** @type {import('sequelize-cli').Migration} */
 
 const { Spot } = require('../models');
@@ -10,7 +8,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 module.exports = {
-	async up(queryInterface, Sequelize) {
+	async up(_queryInterface, _Sequelize) {
 		/**
 		 * Add seed commands here.
 		 *

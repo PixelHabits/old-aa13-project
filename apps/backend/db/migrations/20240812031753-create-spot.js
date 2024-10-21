@@ -70,8 +70,8 @@ module.exports = {
 			options,
 		);
 	},
-	async down(queryInterface, Sequelize) {
+	async down(queryInterface, _Sequelize) {
 		options.tableName = 'Spots';
-		return queryInterface.dropTable(options);
+		await queryInterface.dropTable(options);
 	},
 };

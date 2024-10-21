@@ -1,13 +1,12 @@
+import { assert, expect } from 'chai';
 import pkg from 'supertest';
-import { expect, assert } from 'chai';
 
 import {
-	createUniqueUser,
-	createUniqueSpot,
 	createUniqueImage,
 	createUniqueReview,
+	createUniqueSpot,
+	createUniqueUser,
 } from './agent-helpers.mjs';
-import { apiBaseUrl } from './constants.mjs';
 
 export function createAgent(apiBaseUrl) {
 	return pkg.agent(apiBaseUrl);
@@ -30,7 +29,7 @@ export const fetchManyCsrfTokens = async (agents) =>
 	Promise.all(agents.map(fetchCsrfToken));
 
 export async function agentSignUp(agent, xsrfToken) {
-	let userObj = createUniqueUser();
+	const userObj = createUniqueUser();
 	try {
 		const response = await agent
 			.post('/users')
@@ -45,7 +44,7 @@ export async function agentSignUp(agent, xsrfToken) {
 }
 
 export async function agentCreateSpot(agent, xsrfToken) {
-	let spotObj = createUniqueSpot();
+	const spotObj = createUniqueSpot();
 	try {
 		const response = await agent
 			.post('/spots')
@@ -63,7 +62,7 @@ export async function agentCreateSpot(agent, xsrfToken) {
 }
 
 export async function agentCreateSpotImage(agent, xsrfToken, spotId) {
-	let spotImage = createUniqueImage();
+	const spotImage = createUniqueImage();
 	try {
 		const response = await agent
 			.post(`/spots/${spotId}/images`)
@@ -81,7 +80,7 @@ export async function agentCreateSpotImage(agent, xsrfToken, spotId) {
 }
 
 export async function agentCreateReviewImage(agent, xsrfToken, reviewId) {
-	let reviewImage = { url: 'reviewImageTest.png' };
+	const reviewImage = { url: 'reviewImageTest.png' };
 	try {
 		const response = await agent
 			.post(`/reviews/${reviewId}/images`)
@@ -99,7 +98,7 @@ export async function agentCreateReviewImage(agent, xsrfToken, reviewId) {
 }
 
 export async function agentCreateReview(agent, xsrfToken, nonAgentSpotId) {
-	let newReview = createUniqueReview();
+	const newReview = createUniqueReview();
 	try {
 		const response = await agent
 			.post(`/spots/${nonAgentSpotId}/reviews`)
@@ -109,7 +108,6 @@ export async function agentCreateReview(agent, xsrfToken, nonAgentSpotId) {
 			.expect((response) => expect(response.status).to.be.oneOf([200, 201]));
 		return response;
 	} catch (e) {
-		console.log(e);
 		assert(
 			!e,
 			"Could not test this route because the 'Create a Review' route failed",

@@ -1,17 +1,24 @@
 import { expect } from 'chai';
-import { apiBaseUrl } from '../utils/constants.mjs';
-import { createUniqueSpot } from '../utils/agent-helpers.mjs';
-import { expectedNeOrEditSpotKeys } from '../utils/err-helpers.mjs';
+import { before, describe, it } from 'mocha';
 import {
 	agentCreateSpot,
-	agentSignUp,
 	agentCreateSpotImage,
-	fetchManyCsrfTokens,
+	agentSignUp,
 	createManyAgents,
+	fetchManyCsrfTokens,
 } from '../utils/agent-factory.mjs';
+import { createUniqueSpot } from '../utils/agent-helpers.mjs';
+import { apiBaseUrl } from '../utils/constants.mjs';
+import { expectedNeOrEditSpotKeys } from '../utils/err-helpers.mjs';
 
-describe('\nCreate a Spot', function () {
-	let agent, xsrfToken, agentSpot, agent2, xsrfToken2, agentNonAuth, xsrfToken3;
+describe('\nCreate a Spot', () => {
+	let agent;
+	let xsrfToken;
+	let agentSpot;
+	let agent2;
+	let xsrfToken2;
+	let agentNonAuth;
+	let xsrfToken3;
 
 	before(async function () {
 		this.timeout(15000);
@@ -23,27 +30,27 @@ describe('\nCreate a Spot', function () {
 		]);
 
 		await agentSignUp(agent, xsrfToken);
-		let res = await agentCreateSpot(agent, xsrfToken);
+		const res = await agentCreateSpot(agent, xsrfToken);
 		agentSpot = res.body;
-		let imageRes = await agentCreateSpotImage(agent, xsrfToken, agentSpot.id);
+		const imageRes = await agentCreateSpotImage(agent, xsrfToken, agentSpot.id);
 		agent.image = imageRes;
 	});
 
-	describe('POST /api/spots', function () {
-		it('Correct Endpoint', function (done) {
+	describe('POST /api/spots', () => {
+		it('Correct Endpoint', (done) => {
 			const spotData = createUniqueSpot();
 			agent2
 				.post('/spots')
 				.send(spotData)
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.set('Accept', 'application/json')
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
 
-		it('Authentication', function (done) {
+		it('Authentication', (done) => {
 			const spotData = createUniqueSpot();
 			agentNonAuth
 				.post('/spots')
@@ -51,14 +58,14 @@ describe('\nCreate a Spot', function () {
 				.send(spotData)
 				.set('Accept', 'application/json')
 				.expect(401)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					done();
 				});
 		});
 	});
-	describe('Response', function () {
-		it('Status Code - 201', function (done) {
+	describe('Response', () => {
+		it('Status Code - 201', (done) => {
 			const spotData = createUniqueSpot();
 			agent
 				.post('/spots')
@@ -66,13 +73,13 @@ describe('\nCreate a Spot', function () {
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken)
 				.expect(201)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			const spotData = createUniqueSpot();
 			agent
 				.post('/spots')
@@ -80,7 +87,7 @@ describe('\nCreate a Spot', function () {
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.include.keys(expectedNeOrEditSpotKeys);
 					expect(res.body.name).to.equal(spotData.name);
@@ -89,8 +96,8 @@ describe('\nCreate a Spot', function () {
 				});
 		});
 	});
-	describe('Error Response', function () {
-		it('Status Code - 400', function (done) {
+	describe('Error Response', () => {
+		it('Status Code - 400', (done) => {
 			const incompleteData = {
 				city: 'San Francisco',
 				state: 'California',
@@ -103,13 +110,13 @@ describe('\nCreate a Spot', function () {
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken)
 				.expect(400)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					done();
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			const incompleteData = {
 				city: 'San Francisco',
 				state: 'California',
@@ -121,7 +128,7 @@ describe('\nCreate a Spot', function () {
 				.send(incompleteData)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(res.body).to.have.property('message');
 					expect(res.body.errors).to.include.all.keys(
 						'address',

@@ -1,43 +1,44 @@
 import { expect } from 'chai';
-import { apiBaseUrl } from '../utils/constants.mjs';
+import { before, describe, it } from 'mocha';
 import {
-	agentSignUp,
-	fetchCsrfToken,
-	agentCreateSpot,
 	agentCreateReview,
-	createManyAgents,
-	fetchManyCsrfTokens,
+	agentCreateSpot,
+	agentSignUp,
 	createAgent,
+	createManyAgents,
+	fetchCsrfToken,
+	fetchManyCsrfTokens,
 } from '../utils/agent-factory.mjs';
+import { apiBaseUrl } from '../utils/constants.mjs';
 
-describe('\nDelete a Review', function () {
-	let agent,
-		xsrfToken,
-		agentSpot,
-		agent2,
-		xsrfToken2,
-		agent2Review,
-		agent3,
-		xsrfToken3,
-		agent3Review,
-		agent4,
-		xsrfToken4,
-		agent4Review,
-		agent5,
-		xsrfToken5,
-		agent5Review,
-		agent6,
-		xsrfToken6,
-		agent6Review,
-		agent7,
-		xsrfToken7;
+describe('\nDelete a Review', () => {
+	let agent;
+	let xsrfToken;
+	let agentSpot;
+	let agent2;
+	let xsrfToken2;
+	let agent2Review;
+	let agent3;
+	let xsrfToken3;
+	let agent3Review;
+	let agent4;
+	let xsrfToken4;
+	let _agent4Review;
+	let agent5;
+	let xsrfToken5;
+	let agent5Review;
+	let agent6;
+	let xsrfToken6;
+	let agent6Review;
+	let agent7;
+	let xsrfToken7;
 
 	before(async function () {
 		this.timeout(15000);
-		let agentArr = createManyAgents(apiBaseUrl, 6);
+		const agentArr = createManyAgents(apiBaseUrl, 6);
 		[agent, agent2, agent3, agent4, agent5, agent6] = agentArr;
 
-		let xsrfTokens = await fetchManyCsrfTokens(agentArr);
+		const xsrfTokens = await fetchManyCsrfTokens(agentArr);
 		[xsrfToken, xsrfToken2, xsrfToken3, xsrfToken4, xsrfToken5, xsrfToken6] =
 			xsrfTokens;
 
@@ -48,89 +49,105 @@ describe('\nDelete a Review', function () {
 		agent7 = createAgent(apiBaseUrl);
 		xsrfToken7 = await fetchCsrfToken(agent7);
 
-		let spotRes = await agentCreateSpot(agent, xsrfToken);
+		const spotRes = await agentCreateSpot(agent, xsrfToken);
 		agentSpot = spotRes.body;
 
 		//! review 0
-		let reviewRes = await agentCreateReview(agent2, xsrfToken2, agentSpot.id);
+		const reviewRes = await agentCreateReview(agent2, xsrfToken2, agentSpot.id);
 		agent2Review = reviewRes.body;
 
 		//! review 1
-		let reviewRes1 = await agentCreateReview(agent3, xsrfToken3, agentSpot.id);
+		const reviewRes1 = await agentCreateReview(
+			agent3,
+			xsrfToken3,
+			agentSpot.id,
+		);
 		agent3Review = reviewRes1.body;
 
 		//! review 2
-		let reviewRes2 = await agentCreateReview(agent4, xsrfToken4, agentSpot.id);
-		agent4Review = reviewRes2.body;
+		const reviewRes2 = await agentCreateReview(
+			agent4,
+			xsrfToken4,
+			agentSpot.id,
+		);
+		_agent4Review = reviewRes2.body;
 
 		//! review 3
-		let reviewRes3 = await agentCreateReview(agent5, xsrfToken5, agentSpot.id);
+		const reviewRes3 = await agentCreateReview(
+			agent5,
+			xsrfToken5,
+			agentSpot.id,
+		);
 		agent5Review = reviewRes3.body;
 
 		//! review 4
-		let reviewRes4 = await agentCreateReview(agent6, xsrfToken6, agentSpot.id);
+		const reviewRes4 = await agentCreateReview(
+			agent6,
+			xsrfToken6,
+			agentSpot.id,
+		);
 		agent6Review = reviewRes4.body;
 	});
 
-	describe('DELETE /api/reviews/:reviewId', function () {
-		it('Correct Endpoint', function (done) {
+	describe('DELETE /api/reviews/:reviewId', () => {
+		it('Correct Endpoint', (done) => {
 			agent2
 				.delete(`/reviews/${agent2Review.id}`)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
 
-		it('Authentication', function (done) {
+		it('Authentication', (done) => {
 			agent7
 				.delete(`/reviews/${agent3Review.id}`)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken7)
 				.expect(401)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					return done();
 				});
 		});
 
-		it('Authorization', function (done) {
+		it('Authorization', (done) => {
 			agent4
 				.delete(`/reviews/${agent5Review.id}`)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken4)
 				.expect(403)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					if (err) return done(err);
 					return done();
 				});
 		});
 	});
 
-	describe('Response', function () {
-		it('Status Code - 200', function (done) {
+	describe('Response', () => {
+		it('Status Code - 200', (done) => {
 			agent5
 				.delete(`/reviews/${agent5Review.id}`)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken5)
 				.expect('Content-Type', /json/)
 				.expect(200)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			agent6
 				.delete(`/reviews/${agent6Review.id}`)
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken6)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.have.property('message', 'Successfully deleted');
 					done();
@@ -138,27 +155,27 @@ describe('\nDelete a Review', function () {
 		});
 	});
 
-	describe("Error response: Couldn't find a Review with the specified id", function () {
-		it('Status Code - 404', function (done) {
+	describe("Error response: Couldn't find a Review with the specified id", () => {
+		it('Status Code - 404', (done) => {
 			agent2
-				.delete(`/reviews/523523`)
+				.delete('/reviews/523523')
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.expect('Content-Type', /json/)
 				.expect(404)
-				.end(function (err, res) {
+				.end((err, _res) => {
 					expect(err).to.not.exist;
 					done();
 				});
 		});
 
-		it('Body Matches API Docs', function (done) {
+		it('Body Matches API Docs', (done) => {
 			agent2
-				.delete(`/reviews/523523`)
+				.delete('/reviews/523523')
 				.set('Accept', 'application/json')
 				.set('X-XSRF-TOKEN', xsrfToken2)
 				.expect('Content-Type', /json/)
-				.end(function (err, res) {
+				.end((err, res) => {
 					expect(err).to.not.exist;
 					expect(res.body).to.have.property(
 						'message',
