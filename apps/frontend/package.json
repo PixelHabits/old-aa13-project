@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "vite build",
+		"build": "vite build --watch",
 		"preview": "vite preview",
 		"clean": "git clean -xdf .next .turbo next-env.d.ts node_modules",
 		"format": "(biome format --write; biome lint --write --unsafe --only=nursery/useSortedClasses)",

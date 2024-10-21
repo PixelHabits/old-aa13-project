@@ -42,11 +42,13 @@ export function Modal() {
 	const { modalRef, modalContent, closeModal } = useContext(ModalContext);
 	// If there is no div referenced by the modalRef or modalContent is not a
 	// truthy value, render nothing:
+	// biome-ignore lint/complexity/useSimplifiedLogicExpression: <explanation>
 	if (!modalRef || !modalRef.current || !modalContent) return null;
 
 	// Render the following component to the div referenced by the modalRef
 	return ReactDOM.createPortal(
 		<div id='modal'>
+			{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 			<div id='modal-background' onClick={closeModal} />
 			<div id='modal-content'>{modalContent}</div>
 		</div>,
