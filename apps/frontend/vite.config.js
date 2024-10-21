@@ -16,6 +16,11 @@ export default defineConfig(() => ({
 			applyFixes: true,
 		}),
 	],
+	server: {
+		proxy: {
+			'/api': 'http://localhost:8001',
+		},
+	},
 	// To automatically open the app in the browser whenever the server starts,
 	// uncomment the following lines:
 	// server: {
