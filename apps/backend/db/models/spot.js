@@ -15,6 +15,60 @@ module.exports = (sequelize, DataTypes) => {
 			});
 			Spot.hasMany(models.Review, { foreignKey: 'spotId', as: 'Reviews' });
 		}
+		static previewImageAttribute() {
+			const isPostgres = sequelize.getDialect() === 'postgres';
+			if (isPostgres) {
+				return sequelize.literal(`(
+					SELECT "images"."url"
+					FROM "air_bnb"."SpotImages" AS "images"
+					WHERE "images"."spotId" = "Spot"."id"
+					AND "images"."preview" = true
+					LIMIT 1
+				)`);
+			}
+			// SQLite syntax
+			return sequelize.literal(`(
+					SELECT url
+					FROM SpotImages
+					WHERE spotId = Spot.id
+					AND preview = 1
+					LIMIT 1
+				)`);
+		}
+
+		static avgRatingAttribute() {
+			const isPostgres = sequelize.getDialect() === 'postgres';
+			if (isPostgres) {
+				return sequelize.literal(`(
+					SELECT AVG("reviews"."stars")
+					FROM "air_bnb"."Reviews" AS "reviews"
+					WHERE "reviews"."spotId" = "Spot"."id"
+				)`);
+			}
+			// SQLite syntax
+			return sequelize.literal(`(
+				SELECT AVG(reviews.stars)
+				FROM Reviews AS reviews
+				WHERE reviews.spotId = Spot.id
+			)`);
+		}
+
+		static numReviewsAttribute() {
+			const isPostgres = sequelize.getDialect() === 'postgres';
+			if (isPostgres) {
+				return sequelize.literal(`(
+					SELECT COUNT(*)
+					FROM "air_bnb"."Reviews" AS "reviews"
+					WHERE "reviews"."spotId" = "Spot"."id"
+				)`);
+			}
+			// SQLite syntax
+			return sequelize.literal(`(
+				SELECT COUNT(*)
+				FROM Reviews AS reviews
+				WHERE reviews.spotId = Spot.id
+			)`);
+		}
 	}
 	Spot.init(
 		{

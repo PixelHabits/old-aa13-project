@@ -136,23 +136,8 @@ router.get('/current', requireAuth, async (req, res) => {
 			'price',
 			'createdAt',
 			'updatedAt',
-			[
-				sequelize.literal(`(
-                SELECT AVG("stars")
-                FROM "air_bnb"."Reviews" AS "reviews"
-                WHERE "reviews"."spotId" = "Spot"."id"
-            )`),
-				'avgRating',
-			],
-			[
-				sequelize.literal(`(
-                SELECT "url"
-                FROM "air_bnb"."SpotImages" AS "images"
-                WHERE "images"."spotId" = "Spot"."id" AND "images"."preview" = true
-                LIMIT 1
-            )`),
-				'previewImage',
-			],
+			[Spot.avgRatingAttribute(), 'avgRating'],
+			[Spot.previewImageAttribute(), 'previewImage'],
 		],
 		where: { ownerId: req.user.id },
 	});
@@ -233,22 +218,8 @@ router.get('/:spotId', async (req, res) => {
 			'price',
 			'createdAt',
 			'updatedAt',
-			[
-				sequelize.literal(`(
-		SELECT COUNT(*)
-		FROM "air_bnb"."Reviews" AS "reviews"
-		WHERE "reviews"."spotId" = "Spot"."id"
-	)`),
-				'numReviews',
-			],
-			[
-				sequelize.literal(`(
-		SELECT AVG("reviews"."stars")
-		FROM "air_bnb"."Reviews" AS "reviews"
-		WHERE "reviews"."spotId" = "Spot"."id"
-	)`),
-				'avgStarRating',
-			],
+			[Spot.numReviewsAttribute(), 'numReviews'],
+			[Spot.avgRatingAttribute(), 'avgStarRating'],
 		],
 		include: [
 			{
@@ -375,24 +346,8 @@ router.get('/', validateQuery, async (req, res) => {
 				'price',
 				'createdAt',
 				'updatedAt',
-				[
-					sequelize.literal(`(
-		SELECT AVG("reviews"."stars")
-		FROM "air_bnb"."Reviews" AS "reviews"
-		WHERE "reviews"."spotId" = "Spot"."id"
-	)`),
-					'avgRating',
-				],
-				[
-					sequelize.literal(`(
-		SELECT "images"."url"
-		FROM "air_bnb"."SpotImages" AS "images"
-		WHERE "images"."spotId" = "Spot"."id"
-		AND "images"."preview" = true
-		LIMIT 1
-	)`),
-					'previewImage',
-				],
+				[Spot.avgRatingAttribute(), 'avgRating'],
+				[Spot.previewImageAttribute(), 'previewImage'],
 			],
 		});
 

@@ -45,16 +45,7 @@ router.get('/current', requireAuth, async (req, res) => {
 					'lng',
 					'name',
 					'price',
-					[
-						sequelize.literal(`(
-		SELECT "images"."url"
-		FROM "air_bnb"."SpotImages" AS "images"
-		WHERE "images"."spotId" = "Spot"."id"
-		AND "images"."preview" = true
-		LIMIT 1
-	)`),
-						'previewImage',
-					],
+					[Spot.previewImageAttribute(), 'previewImage'],
 				],
 			},
 			{ model: ReviewImage, as: 'ReviewImages' },
