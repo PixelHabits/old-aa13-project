@@ -1,22 +1,37 @@
 {
-	"name": "@repo/frontend",
-	"version": "0.1.0",
-	"private": true,
-	"type": "module",
-	"packageManager": "bun@1.1.21",
-	"engines": {
-		"bun": "^1.1.21"
-	},
-	"scripts": {
-		"clean": "git clean -xdf .next .turbo next-env.d.ts node_modules",
-		"format": "(biome format --write; biome lint --write --unsafe --only=nursery/useSortedClasses)",
-		"lint": "biome check",
-		"lint:fix": "biome check --write"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "^1.9.2",
-		"@repo/tsconfig": "workspace:*",
-		"@types/bun": "^1.1.10",
-		"typescript": "^5.6.2"
-	}
+  "name": "@repo/frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+			"dev": "vite",
+			"build": "vite build",
+			"lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+			"preview": "vite preview",
+			"clean": "git clean -xdf .next .turbo next-env.d.ts node_modules",
+			"format": "(biome format --write; biome lint --write --unsafe --only=nursery/useSortedClasses)",
+			"lint:biome": "biome check",
+			"lint:fix": "biome check --write"
+		},
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.1.1",
+    "react-router-dom": "^6.15.0",
+    "redux": "^4.2.1",
+    "redux-thunk": "^2.4.2"
+  },
+  "devDependencies": {
+			"@biomejs/biome": "^1.9.2",
+			"@types/react": "^18.2.15",
+			"@types/react-dom": "^18.2.7",
+			"@vitejs/plugin-react": "^4.0.3",
+			"eslint": "^8.45.0",
+			"eslint-plugin-react": "^7.32.2",
+			"eslint-plugin-react-hooks": "^4.6.0",
+			"eslint-plugin-react-refresh": "^0.4.3",
+			"redux-logger": "^3.0.6",
+			"vite": "^4.4.5",
+			"vite-plugin-eslint": "^1.8.1"
+		}
 }
