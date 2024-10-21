@@ -29,7 +29,7 @@ if (!isProduction) {
 app.use(
 	helmet.crossOriginResourcePolicy({
 		policy: 'cross-origin',
-	})
+	}),
 );
 
 // Set the _csrf token and create req.csrfToken method
@@ -40,12 +40,14 @@ app.use(
 			sameSite: isProduction && 'Lax',
 			httpOnly: true,
 		},
-	})
+	}),
 );
 
 app.use(routes); // Connect all the routes
 
-app.get('/', (_req,res) => {res.send('Hello World!')});
+app.get('/', (_req, res) => {
+	res.send('Hello World!');
+});
 
 // Catch unhandled requests and forward to error handler.
 app.use((_req, _res, next) => {

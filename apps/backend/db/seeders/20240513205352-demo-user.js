@@ -36,7 +36,7 @@ module.exports = {
 					email: 'user2@user.io',
 				},
 			],
-			{ validate: true }
+			{ validate: true },
 		);
 	},
 
@@ -48,7 +48,7 @@ module.exports = {
 			{
 				username: { [Op.in]: ['Demo-lition', 'FakeUser1', 'FakeUser2'] },
 			},
-			{}
+			{},
 		);
 	},
 };

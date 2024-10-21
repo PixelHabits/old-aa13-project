@@ -35,7 +35,7 @@ router.get('/', (req, res) => {
 		return res.json({
 			user: safeUser,
 		});
-	} 
+	}
 	return res.json({ user: null });
 });
 

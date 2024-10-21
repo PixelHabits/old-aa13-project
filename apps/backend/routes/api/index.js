@@ -31,7 +31,7 @@ router.use('/review-images', reviewImagesRouter);
 // 	res.json({ requestBody: req.body });
 // });
 
-router.get('/', (_req,res) => {
+router.get('/', (_req, res) => {
 	res.json({ message: 'Test API Route' });
 });
 
