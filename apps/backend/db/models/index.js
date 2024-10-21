@@ -1,15 +1,18 @@
-const fs = require('node:fs');
-const path = require('node:path');
-const Sequelize = require('sequelize');
-const process = require('node:process');
-const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../../config/database.js')[env];
+// biome-ignore lint/correctness/noNodejsModules: <explanation>
+import { readdirSync } from 'node:fs';
+// biome-ignore lint/correctness/noNodejsModules: <explanation>
+import { basename as _basename, join } from 'node:path';
+import Sequelize, { DataTypes } from 'sequelize';
+// biome-ignore lint/correctness/noNodejsModules: <explanation>
+import { env as _env } from 'node:process';
+const basename = _basename(__filename);
+const env = _env.NODE_ENV || 'development';
+const config = require(`${__dirname}/../../config/database.js`)[env];
 const db = {};
 
 let sequelize;
 if (config.use_env_variable) {
-	sequelize = new Sequelize(process.env[config.use_env_variable], config);
+	sequelize = new Sequelize(_env[config.use_env_variable], config);
 } else {
 	sequelize = new Sequelize(
 		config.database,
@@ -19,7 +22,7 @@ if (config.use_env_variable) {
 	);
 }
 
-for (const file of fs.readdirSync(__dirname).filter((file) => {
+for (const file of readdirSync(__dirname).filter((file) => {
 	return (
 		file.indexOf('.') !== 0 &&
 		file !== basename &&
@@ -27,9 +30,9 @@ for (const file of fs.readdirSync(__dirname).filter((file) => {
 		file.indexOf('.test.js') === -1
 	);
 })) {
-	const model = require(path.join(__dirname, file))(
+	const model = require(join(__dirname, file))(
 		sequelize,
-		Sequelize.DataTypes,
+		DataTypes,
 	);
 	db[model.name] = model;
 }
@@ -43,4 +46,4 @@ for (const modelName of Object.keys(db)) {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-module.exports = db;
+export default db;
